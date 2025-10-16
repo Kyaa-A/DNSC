@@ -9,7 +9,7 @@ const recordAttendanceSchema = z.object({
   studentId: z.string().min(1, 'Student ID is required'),
   sessionId: z.string().min(1, 'Session ID is required'),
   eventId: z.string().min(1, 'Event ID is required'),
-  scanType: z.enum(['time_in', 'time_out']).default('time_in'),
+  scanType: z.enum(['time_in', 'time_out']),
   scannedBy: z.string().optional(), // Will be set from authenticated organizer
   ipAddress: z.string().optional(),
   userAgent: z.string().optional(),
@@ -70,6 +70,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { studentId, sessionId, scanType } = validationResult.data;
+
+    console.log('🔍 Received request data:', {
+      studentId,
+      sessionId,
+      scanType,
+      originalBody: body
+    });
 
     // Verify session exists and organizer has access
     const session = await prisma.session.findUnique({
@@ -192,7 +199,7 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Check for existing attendance record (use student.id which is the database ID)
+    // Check for existing attendance records and validate scan sequence
     console.log('🔍 Checking for duplicate attendance:', {
       studentId: student.id,
       studentIdNumber: student.studentIdNumber,
@@ -200,17 +207,7 @@ export async function POST(request: NextRequest) {
       scanType
     });
     
-    const existingAttendance = await prisma.attendance.findFirst({
-      where: {
-        studentId: student.id,
-        sessionId,
-        scanType,
-      },
-    });
-
-    console.log('🔍 Existing attendance found:', existingAttendance);
-    
-    // Also check if there are any attendance records for this student in this session (regardless of scanType)
+    // Get all existing attendance records for this student in this session
     const allAttendanceForStudent = await prisma.attendance.findMany({
       where: {
         studentId: student.id,
@@ -219,7 +216,13 @@ export async function POST(request: NextRequest) {
     });
     console.log('🔍 All attendance records for this student in this session:', allAttendanceForStudent);
 
-    if (existingAttendance) {
+    const timeInRecord = allAttendanceForStudent.find(record => record.scanType === 'time_in');
+    const timeOutRecord = allAttendanceForStudent.find(record => record.scanType === 'time_out');
+
+    // Check for duplicate scan of the same type
+    const sameTypeRecord = allAttendanceForStudent.find(record => record.scanType === scanType);
+    
+    if (sameTypeRecord) {
       await logSystemEvent(
         'attendance_recording_failed',
         `Attendance recording failed: Duplicate attendance record (Student: ${studentId}, Session: ${sessionId}, Type: ${scanType})`,
@@ -248,11 +251,43 @@ export async function POST(request: NextRequest) {
           email: student.email,
         },
         existingAttendance: {
-          timeIn: existingAttendance.timeIn,
-          timeOut: existingAttendance.timeOut,
-          createdAt: existingAttendance.createdAt,
+          timeIn: sameTypeRecord.timeIn,
+          timeOut: sameTypeRecord.timeOut,
+          createdAt: sameTypeRecord.createdAt,
         }
       }, { status: 409 });
+    }
+
+    // Validate scan sequence
+    if (scanType === 'time_out' && !timeInRecord) {
+      await logSystemEvent(
+        'attendance_recording_failed',
+        `Attendance recording failed: Cannot scan time-out without time-in (Student: ${studentId}, Session: ${sessionId})`,
+        'warning',
+        {
+          sessionId,
+          eventId: session.event.id,
+          studentId,
+          organizerId: organizer.id,
+          errorType: 'invalid_scan_sequence',
+          processingDuration: Date.now() - startTime,
+          ipAddress,
+          userAgent,
+          referer,
+        }
+      );
+      
+      return NextResponse.json({ 
+        error: 'Invalid scan sequence',
+        message: 'Cannot scan time-out without first scanning time-in for this session.',
+        student: {
+          id: student.id,
+          studentIdNumber: student.studentIdNumber,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+        }
+      }, { status: 400 });
     }
 
     // Create attendance record (use student.id which is the database ID)

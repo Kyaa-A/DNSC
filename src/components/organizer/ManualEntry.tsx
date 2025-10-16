@@ -185,6 +185,14 @@ export function ManualEntry({
 
   // Form submission
   const onSubmit = async (data: ManualEntryFormData) => {
+    console.log('🚨 FORM SUBMISSION DEBUG:', {
+      originalScanType: data.scanType,
+      convertedScanType: data.scanType === 'TIME_IN' ? 'time_in' : 'time_out',
+      studentId: validatedStudent?.id,
+      sessionId,
+      eventId
+    });
+
     if (!validatedStudent) {
       setError('Please validate the student ID first');
       return;
@@ -194,6 +202,14 @@ export function ManualEntry({
     setError(null);
 
     try {
+      console.log('🔍 Sending attendance request:', {
+        studentId: validatedStudent.id,
+        sessionId,
+        eventId,
+        scanType: data.scanType === 'TIME_IN' ? 'time_in' : 'time_out',
+        originalScanType: data.scanType
+      });
+
       const response = await fetch('/api/organizer/attendance', {
         method: 'POST',
         headers: {
@@ -203,7 +219,7 @@ export function ManualEntry({
           studentId: validatedStudent.id,
           sessionId,
           eventId,
-          scanType: data.scanType.toLowerCase(),
+          scanType: data.scanType === 'TIME_IN' ? 'time_in' : 'time_out',
           scannedBy: 'organizer',
         }),
       });
@@ -393,7 +409,10 @@ export function ManualEntry({
               <Label htmlFor="scanType">Scan Type</Label>
               <Select 
                 value={scanTypeValue} 
-                onValueChange={(value) => setValue('scanType', value as 'TIME_IN' | 'TIME_OUT')}
+                onValueChange={(value) => {
+                  console.log('🔍 Scan type changed to:', value);
+                  setValue('scanType', value as 'TIME_IN' | 'TIME_OUT');
+                }}
                 disabled={isProcessing}
               >
                 <SelectTrigger>
@@ -407,6 +426,10 @@ export function ManualEntry({
               {errors.scanType && (
                 <p className="text-red-500 text-sm">{errors.scanType.message}</p>
               )}
+              {/* Debug info */}
+              <div className="text-xs text-gray-500">
+                Current scan type: {scanTypeValue} → {scanTypeValue === 'TIME_IN' ? 'time_in' : 'time_out'}
+              </div>
             </div>
 
             {/* Student Validation Result */}

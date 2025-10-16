@@ -245,20 +245,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate scans
+    // Check for duplicate scans and validate scan sequence
     if (studentValidation.isValid && studentValidation.student) {
-      const existingRecord = await prisma.attendance.findFirst({
+      // Get all existing attendance records for this student in this session
+      const existingRecords = await prisma.attendance.findMany({
         where: {
           studentId: studentValidation.student.id,
           sessionId: validatedData.sessionId,
-          scanType: scanType.type as ScanActionType,
         },
         orderBy: { createdAt: 'desc' },
       });
 
-      if (existingRecord) {
+      const timeInRecord = existingRecords.find(record => record.scanType === 'time_in');
+      const timeOutRecord = existingRecords.find(record => record.scanType === 'time_out');
+
+      // Check for duplicate scan of the same type
+      const sameTypeRecord = existingRecords.find(record => record.scanType === scanType.type);
+      
+      if (sameTypeRecord) {
         const timeSinceLastScan = Math.floor(
-          (currentTime.getTime() - existingRecord.createdAt.getTime()) / (1000 * 60)
+          (currentTime.getTime() - sameTypeRecord.createdAt.getTime()) / (1000 * 60)
         );
 
         return NextResponse.json(
@@ -266,6 +272,40 @@ export async function POST(request: NextRequest) {
             success: false, 
             error: 'Duplicate scan',
             message: `You have already scanned ${scanType.type} for this session. Last scan was ${timeSinceLastScan} minutes ago.`
+          },
+          { status: 409 }
+        );
+      }
+
+      // Validate scan sequence
+      if (scanType.type === 'time_out' && !timeInRecord) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Invalid scan sequence',
+            message: 'Cannot scan time-out without first scanning time-in for this session.'
+          },
+          { status: 400 }
+        );
+      }
+
+      if (scanType.type === 'time_in' && timeInRecord) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Already checked in',
+            message: 'You have already checked in for this session.'
+          },
+          { status: 409 }
+        );
+      }
+
+      if (scanType.type === 'time_out' && timeOutRecord) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Already checked out',
+            message: 'You have already checked out for this session.'
           },
           { status: 409 }
         );

@@ -471,13 +471,41 @@ export function ScanPage() {
 
                     console.log('📍 Step 2: Student ID validated:', studentId);
 
+                    // Determine scan type based on current time and session windows
+                    console.log('📍 Step 2.5: Determining scan type...');
+                    const currentTime = new Date();
+                    const sessionStart = new Date(selectedSession.timeInStart);
+                    const sessionEnd = new Date(selectedSession.timeInEnd);
+                    const timeOutStart = selectedSession.timeOutStart ? new Date(selectedSession.timeOutStart) : null;
+                    const timeOutEnd = selectedSession.timeOutEnd ? new Date(selectedSession.timeOutEnd) : null;
+
+                    let scanType = 'time_in'; // Default to time_in
+                    
+                    // Check if we're in the time-out window
+                    if (timeOutStart && timeOutEnd && currentTime >= timeOutStart && currentTime <= timeOutEnd) {
+                      scanType = 'time_out';
+                      console.log('🕐 Determined scan type: time_out (within timeout window)');
+                    } else if (currentTime >= sessionStart && currentTime <= sessionEnd) {
+                      scanType = 'time_in';
+                      console.log('🕐 Determined scan type: time_in (within time-in window)');
+                    } else {
+                      console.log('🕐 Determined scan type: time_in (default - outside windows)');
+                    }
+
+                    // Show processing toast
+                    toast.loading('Processing scan...', {
+                      description: `Recording ${scanType === 'time_in' ? 'Time-In' : 'Time-Out'} for ${studentId}`,
+                      duration: 0, // Don't auto-dismiss
+                      id: 'scan-processing', // Use ID to update the same toast
+                    });
+
                     // Record attendance via API
                     console.log('📍 Step 3: Sending attendance request...');
                     console.log('📤 Request data:', {
                       sessionId: selectedSession.id,
                       eventId: selectedSession.eventId,
                       studentId: studentId,
-                      scanType: 'time_in',
+                      scanType: scanType,
                     });
 
                     const response = await fetch('/api/organizer/attendance', {
@@ -489,7 +517,7 @@ export function ScanPage() {
                         sessionId: selectedSession.id,
                         eventId: selectedSession.eventId,
                         studentId: studentId,
-                        scanType: 'time_in',
+                        scanType: scanType,
                       }),
                     });
 
@@ -507,6 +535,9 @@ export function ScanPage() {
                       console.log('⚠️ Duplicate scan detected');
                       const errorData = await response.json();
                       console.log('🔍 API Response for duplicate:', errorData);
+                      
+                      // Dismiss processing toast
+                      toast.dismiss('scan-processing');
                       
                       // Use student information from API response instead of QR data
                       const studentInfo = errorData.student || {};
@@ -526,7 +557,7 @@ export function ScanPage() {
                         isDuplicate: true,
                       });
                       
-                      // Show warning toast (not error)
+                      // Show warning toast (orange/yellow color)
                       toast.warning('Already Recorded', {
                         description: errorData.message || 'This student has already been recorded for this session',
                         duration: 4000,
@@ -541,8 +572,15 @@ export function ScanPage() {
                       console.log('📍 Step 5: Response not OK, parsing error...');
                       const errorData = await response.json();
                       console.error('❌ API Error Response:', errorData);
+                      
+                      // Dismiss processing toast
+                      toast.dismiss('scan-processing');
+                      
                       throw new Error(errorData.message || errorData.error || 'Failed to record attendance');
                     }
+
+                    // Dismiss processing toast
+                    toast.dismiss('scan-processing');
 
                     console.log('📍 Step 5: Parsing success response...');
                     const result = await response.json();
@@ -570,9 +608,10 @@ export function ScanPage() {
                     // Update attendance stats with data from API response
                     handleAttendanceRecorded();
 
-                    // Show success toast with actual student name
+                    // Show success toast with actual student name and scan type
                     if (result.student?.firstName && result.student?.lastName) {
-                      toast.success('✅ Attendance Recorded!', {
+                      const scanTypeText = scanType === 'time_in' ? 'Time-In' : 'Time-Out';
+                      toast.success(`✅ Successfully ${scanTypeText}!`, {
                         description: `${result.student.firstName} ${result.student.lastName} - ${result.student.studentIdNumber}`,
                         duration: 4000,
                       });
@@ -582,6 +621,10 @@ export function ScanPage() {
                     console.error('❌ Error recording attendance:', error);
                     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
                     const errorMsg = error instanceof Error ? error.message : 'Failed to record attendance';
+                    
+                    // Dismiss processing toast
+                    toast.dismiss('scan-processing');
+                    
                     toast.error('Recording Failed', {
                       description: errorMsg
                     });
@@ -613,13 +656,41 @@ export function ScanPage() {
 
                     console.log('📍 Step 2: Student ID number validated:', studentIdNumber);
 
+                    // Determine scan type based on current time and session windows
+                    console.log('📍 Step 2.5: Determining scan type...');
+                    const currentTime = new Date();
+                    const sessionStart = new Date(selectedSession.timeInStart);
+                    const sessionEnd = new Date(selectedSession.timeInEnd);
+                    const timeOutStart = selectedSession.timeOutStart ? new Date(selectedSession.timeOutStart) : null;
+                    const timeOutEnd = selectedSession.timeOutEnd ? new Date(selectedSession.timeOutEnd) : null;
+
+                    let scanType = 'time_in'; // Default to time_in
+                    
+                    // Check if we're in the time-out window
+                    if (timeOutStart && timeOutEnd && currentTime >= timeOutStart && currentTime <= timeOutEnd) {
+                      scanType = 'time_out';
+                      console.log('🕐 Determined scan type: time_out (within timeout window)');
+                    } else if (currentTime >= sessionStart && currentTime <= sessionEnd) {
+                      scanType = 'time_in';
+                      console.log('🕐 Determined scan type: time_in (within time-in window)');
+                    } else {
+                      console.log('🕐 Determined scan type: time_in (default - outside windows)');
+                    }
+
+                    // Show processing toast
+                    toast.loading('Processing scan...', {
+                      description: `Recording ${scanType === 'time_in' ? 'Time-In' : 'Time-Out'} for ${studentIdNumber.trim()}`,
+                      duration: 0, // Don't auto-dismiss
+                      id: 'manual-scan-processing', // Use different ID for manual input
+                    });
+
                     // Record attendance via API
                     console.log('📍 Step 3: Sending attendance request...');
                     console.log('📤 Request data:', {
                       sessionId: selectedSession.id,
                       eventId: selectedSession.eventId,
                       studentId: studentIdNumber.trim(),
-                      scanType: 'time_in',
+                      scanType: scanType,
                     });
 
                     const response = await fetch('/api/organizer/attendance', {
@@ -631,7 +702,7 @@ export function ScanPage() {
                         sessionId: selectedSession.id,
                         eventId: selectedSession.eventId,
                         studentId: studentIdNumber.trim(),
-                        scanType: 'time_in',
+                        scanType: scanType,
                       }),
                     });
 
@@ -643,6 +714,9 @@ export function ScanPage() {
                       console.log('⚠️ Duplicate manual input detected');
                       const errorData = await response.json();
                       console.log('🔍 API Response for duplicate:', errorData);
+                      
+                      // Dismiss processing toast
+                      toast.dismiss('manual-scan-processing');
                       
                       // Use student information from API response
                       const studentInfo = errorData.student || {};
@@ -656,7 +730,7 @@ export function ScanPage() {
                         isDuplicate: true,
                       });
                       
-                      // Show warning toast (not error)
+                      // Show warning toast (orange/yellow color)
                       toast.warning('Already Recorded', {
                         description: errorData.message || 'This student has already been recorded for this session',
                         duration: 4000,
@@ -671,8 +745,15 @@ export function ScanPage() {
                       console.log('📍 Step 5: Response not OK, parsing error...');
                       const errorData = await response.json();
                       console.error('❌ API Error Response:', errorData);
+                      
+                      // Dismiss processing toast
+                      toast.dismiss('manual-scan-processing');
+                      
                       throw new Error(errorData.message || errorData.error || 'Failed to record attendance');
                     }
+
+                    // Dismiss processing toast
+                    toast.dismiss('manual-scan-processing');
 
                     console.log('📍 Step 5: Parsing success response...');
                     const result = await response.json();
@@ -700,9 +781,10 @@ export function ScanPage() {
                     // Update attendance stats with data from API response
                     handleAttendanceRecorded();
 
-                    // Show success toast with actual student name
+                    // Show success toast with actual student name and scan type
                     if (result.student?.firstName && result.student?.lastName) {
-                      toast.success('✅ Attendance Recorded!', {
+                      const scanTypeText = scanType === 'time_in' ? 'Time-In' : 'Time-Out';
+                      toast.success(`✅ Successfully ${scanTypeText}!`, {
                         description: `${result.student.firstName} ${result.student.lastName} - ${result.student.studentIdNumber}`,
                         duration: 4000,
                       });
@@ -712,6 +794,10 @@ export function ScanPage() {
                     console.error('❌ Error recording attendance:', error);
                     console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
                     const errorMsg = error instanceof Error ? error.message : 'Failed to record attendance';
+                    
+                    // Dismiss processing toast
+                    toast.dismiss('manual-scan-processing');
+                    
                     toast.error('Recording Failed', {
                       description: errorMsg
                     });
