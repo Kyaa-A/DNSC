@@ -10,10 +10,10 @@ function parseStringList(param: string | null | undefined): string[] {
   return param.split(',').map(s => s.trim()).filter(Boolean)
 }
 
-export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const resolved = 'then' in ctx.params ? await (ctx.params as Promise<{ id: string }>) : (ctx.params as { id: string })
-    const eventId = resolved.id
+    const params = await ctx.params
+    const eventId = params.id
     if (!eventId) return Response.json({ success: false, error: 'Missing event id' }, { status: 400 })
 
     const { searchParams } = new URL(req.url)

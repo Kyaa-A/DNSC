@@ -26,10 +26,10 @@ function deriveStatus(timeIn: Date | null, timeOut: Date | null): string {
   return 'absent'
 }
 
-export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> | { id: string } }) {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const resolved = 'then' in ctx.params ? await (ctx.params as Promise<{ id: string }>) : (ctx.params as { id: string })
-    const eventId = resolved.id
+    const params = await ctx.params
+    const eventId = params.id
     if (!eventId) {
       return new Response(JSON.stringify({ error: 'Missing event id' }), { status: 400 })
     }
