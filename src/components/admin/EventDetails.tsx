@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, Users, Clock, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Edit, Trash2, Plus, Eye, CheckCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { AdminGuard } from '@/components/auth/AdminGuard';
+import { useAttendance } from '@/hooks/use-attendance';
 import { EventWithDetails } from '@/lib/types/event';
 import { SessionWithDetails } from '@/lib/types/session';
 import { SessionConfig } from './SessionConfig';
@@ -22,6 +25,9 @@ export function EventDetails({ event, onClose }: EventDetailsProps) {
   const [error, setError] = useState<string | null>(null);
   const [showSessionConfig, setShowSessionConfig] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+
+  // Attendance data for the Attendance tab
+  const { loading: attendanceLoading, kpis: attendanceKpis, rows: attendanceRows, perSessionAggregates } = useAttendance(event.id);
 
   // Refresh event details
   const fetchEventDetails = useCallback(async () => {
@@ -69,6 +75,12 @@ export function EventDetails({ event, onClose }: EventDetailsProps) {
       minute: '2-digit',
     });
   };
+
+  // Lazy placeholders for Attendance components to be implemented later
+  const AttendanceKpis = dynamic(() => import('@/components/admin/attendance/AttendanceKpis').then(m => m.AttendanceKpis), { ssr: false });
+  const AttendanceFilters = dynamic(() => import('@/components/admin/attendance/AttendanceFilters').then(m => m.AttendanceFilters), { ssr: false });
+
+  const AttendanceTable = dynamic(() => import('@/components/admin/attendance/AttendanceTable').then(m => m.AttendanceTable), { ssr: false });
 
   // Format time for display
   const formatTime = (date: string | Date) => {
@@ -220,9 +232,15 @@ export function EventDetails({ event, onClose }: EventDetailsProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="sessions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
           <TabsTrigger value="organizers">Organizers</TabsTrigger>
+          <TabsTrigger value="attendance">
+            <span className="inline-flex items-center gap-2">
+              <CheckCircle className="h-4 w-4" />
+              Attendance
+            </span>
+          </TabsTrigger>
           <TabsTrigger value="statistics">Statistics</TabsTrigger>
         </TabsList>
 
@@ -370,6 +388,25 @@ export function EventDetails({ event, onClose }: EventDetailsProps) {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Attendance Tab (Admin only) */}
+        <TabsContent value="attendance" className="space-y-4">
+          <AdminGuard requiredRole="admin">
+            <Suspense fallback={<div className="h-16 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceFilters 
+                sessions={sessions.map(s => ({ id: s.id, name: s.name }))}
+                eventId={event.id}
+                className=""
+              />
+            </Suspense>
+            <Suspense fallback={<div className="h-24 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceKpis loading={attendanceLoading} data={attendanceKpis ?? undefined} perSessionAggregates={perSessionAggregates} />
+            </Suspense>
+            <Suspense fallback={<div className="h-24 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceTable loading={attendanceLoading} rows={attendanceRows} eventTimeZone={'Asia/Manila'} />
+            </Suspense>
+          </AdminGuard>
         </TabsContent>
 
         {/* Statistics Tab */}

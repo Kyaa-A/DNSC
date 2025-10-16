@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Users, BarChart3, Plus, Eye, Edit, Trash2, Calendar } from 'lucide-react';
+import { Clock, Users, BarChart3, Plus, Eye, Edit, Trash2, Calendar, CheckCircle } from 'lucide-react';
 import { EventWithDetails } from '@/lib/types/event';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+import { AdminGuard } from '@/components/auth/AdminGuard';
+import { useAttendance } from '@/hooks/use-attendance';
 
 interface EventDetailTabsProps {
   event: EventWithDetails;
@@ -33,6 +36,38 @@ export function EventDetailTabs({
   className,
 }: EventDetailTabsProps) {
   const [activeTab, setActiveTab] = useState('sessions');
+  
+  // Fetch attendance data for the attendance tab
+  const { loading, kpis, rows, perSessionAggregates } = useAttendance(event.id);
+
+  // Initialize tab from URL (?tab=...) and keep in sync with back/forward
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+
+    const onPopState = () => {
+      const sp = new URLSearchParams(window.location.search);
+      const t = sp.get('tab');
+      if (t && t !== activeTab) {
+        setActiveTab(t);
+      }
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', value);
+    // Push a new history entry so back/forward preserves tab state
+    window.history.pushState({}, '', url.toString());
+  };
 
   const formatDate = (date: string | Date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   const formatTime = (date: string | Date) => new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -69,10 +104,15 @@ export function EventDetailTabs({
     }
   };
 
+  // Lazy attendance components (client-only)
+  const AttendanceFilters = dynamic(() => import('@/components/admin/attendance/AttendanceFilters').then(m => m.AttendanceFilters), { ssr: false });
+  const AttendanceKpis = dynamic(() => import('@/components/admin/attendance/AttendanceKpis').then(m => m.AttendanceKpis), { ssr: false });
+  const AttendanceTable = dynamic(() => import('@/components/admin/attendance/AttendanceTable').then(m => m.AttendanceTable), { ssr: false });
+
   return (
     <div className={cn("space-y-6", className)}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sessions" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Sessions
@@ -86,6 +126,10 @@ export function EventDetailTabs({
             <Badge variant="secondary" className="ml-1">
               {event._count.organizerAssignments}
             </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="attendance" className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            Attendance
           </TabsTrigger>
           <TabsTrigger value="statistics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -228,6 +272,24 @@ export function EventDetailTabs({
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Attendance Tab (Admin only) */}
+        <TabsContent value="attendance" className="space-y-4">
+          <AdminGuard requiredRole="admin">
+            <Suspense fallback={<div className="h-16 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceFilters 
+                sessions={event.sessions.map((s) => ({ id: s.id, name: s.name }))}
+                eventId={event.id}
+              />
+            </Suspense>
+            <Suspense fallback={<div className="h-24 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceKpis loading={loading} data={kpis ?? undefined} perSessionAggregates={perSessionAggregates} />
+            </Suspense>
+            <Suspense fallback={<div className="h-24 bg-gray-100 rounded animate-pulse" />}>
+              <AttendanceTable loading={loading} rows={rows} eventTimeZone={'Asia/Manila'} />
+            </Suspense>
+          </AdminGuard>
         </TabsContent>
 
         <TabsContent value="statistics" className="space-y-4">

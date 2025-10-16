@@ -665,3 +665,129 @@ export async function attendanceRecordExists(
     return false;
   }
 }
+
+// =====================
+// Event attendance queries with filters (for admin UI/API)
+// =====================
+
+export type DerivedAttendanceStatus = 'present' | 'checked-in' | 'checked-out' | 'absent'
+import { deriveAttendanceStatus } from '@/lib/utils/attendance-status'
+
+export interface EventAttendanceListOptions {
+  sessionIds?: string[]
+  q?: string
+  statuses?: DerivedAttendanceStatus[]
+  sort?: 'name' | 'status' | 'checkInAt'
+  order?: 'asc' | 'desc'
+  page?: number
+  pageSize?: number
+}
+
+export interface EventAttendanceRowDto {
+  id: string
+  name: string | null
+  email: string | null
+  studentId: string | null
+  programSection: string | null
+  status: DerivedAttendanceStatus
+  checkInAt: string | null
+  checkOutAt: string | null
+  sessionName: string | null
+}
+
+export async function getEventAttendanceListWithFilters(
+  eventId: string,
+  options: EventAttendanceListOptions = {}
+): Promise<{ rows: EventAttendanceRowDto[]; total: number; page: number; pageSize: number }> {
+  const {
+    sessionIds = [],
+    q = '',
+    statuses = [],
+    sort = 'name',
+    order = 'asc',
+    page = 1,
+    pageSize = 50,
+  } = options
+
+  const where: Record<string, unknown> = { eventId }
+  if (sessionIds.length > 0) where.sessionId = { in: sessionIds }
+  if (q) {
+    where.OR = [
+      { student: { firstName: { contains: q, mode: 'insensitive' } } },
+      { student: { lastName: { contains: q, mode: 'insensitive' } } },
+      { student: { email: { contains: q, mode: 'insensitive' } } },
+      { student: { studentIdNumber: { contains: q, mode: 'insensitive' } } },
+    ]
+  }
+
+  const include = {
+    student: {
+      select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        studentIdNumber: true,
+        program: { select: { name: true } },
+      },
+    },
+    session: { select: { name: true } },
+  } as const
+
+  const orderBy = (() => {
+    switch (sort) {
+      case 'name':
+        return [{ student: { lastName: order } }, { student: { firstName: order } }]
+      case 'status':
+        return [{ timeIn: order }, { timeOut: order }]
+      case 'checkInAt':
+        return [{ timeIn: order }]
+      default:
+        return [{ createdAt: order }]
+    }
+  })()
+
+  const skip = (page - 1) * pageSize
+  const [records, total] = await Promise.all([
+    prisma.attendance.findMany({ where, include, orderBy: Array.isArray(orderBy) ? orderBy : [orderBy], skip, take: pageSize }),
+    prisma.attendance.count({ where }),
+  ])
+
+  const rows: EventAttendanceRowDto[] = records
+    .map((r) => {
+      const status = deriveAttendanceStatus({ timeIn: r.timeIn, timeOut: r.timeOut }) as DerivedAttendanceStatus
+      return {
+        id: r.id,
+        name: [r.student?.firstName, r.student?.lastName].filter(Boolean).join(' ') || null,
+        email: r.student?.email ?? null,
+        studentId: r.student?.studentIdNumber ?? null,
+        programSection: [r.student?.program?.name].filter(Boolean).join('/') || null,
+        status,
+        checkInAt: r.timeIn ? r.timeIn.toISOString() : null,
+        checkOutAt: r.timeOut ? r.timeOut.toISOString() : null,
+        sessionName: r.session?.name ?? null,
+      }
+    })
+    .filter((r) => (statuses.length > 0 ? statuses.includes(r.status) : true))
+
+  return { rows, total, page, pageSize }
+}
+
+export async function getEventAttendanceKpis(
+  eventId: string
+): Promise<{ registered: number; present: number; checkedInOnly: number; checkedOut: number; absent: number; attendanceRatePercent: number }> {
+  const registered = await prisma.attendance.groupBy({ by: ['studentId'], where: { eventId }, _count: { studentId: true } }).then((g) => g.length)
+  // For present/checked-in/out we approximate on attendance rows; refine with domain rules if needed
+  const recent = await prisma.attendance.findMany({ where: { eventId }, select: { timeIn: true, timeOut: true } })
+  let present = 0,
+    checkedInOnly = 0,
+    checkedOut = 0
+  for (const r of recent) {
+    const s = deriveAttendanceStatus({ timeIn: r.timeIn, timeOut: r.timeOut })
+    if (s === 'present') present++
+    else if (s === 'checked-in') checkedInOnly++
+    else if (s === 'checked-out') checkedOut++
+  }
+  const absent = Math.max(registered - present, 0)
+  const attendanceRatePercent = registered > 0 ? Math.round((present / registered) * 100) : 0
+  return { registered, present, checkedInOnly, checkedOut, absent, attendanceRatePercent }
+}
