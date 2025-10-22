@@ -49,25 +49,24 @@ export function HeaderNav() {
 
           {/* CTA Section: Primary = Join Event; Secondary = Admin Sign In link */}
           <div className="flex items-center gap-4">
-            <Link href="/join" aria-label="Join event registration" prefetch>
-              <Button 
-                variant="default"
-                className="hidden md:inline-flex shadow"
-                style={{ 
-                  backgroundColor: '#f59e0b', 
-                  color: '#000',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#d97706';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f59e0b';
-                }}
-              >
-                <Users className="size-4 mr-2" />
-                Join Event
-              </Button>
+            <Link 
+              href="/join" 
+              aria-label="Join event registration" 
+              className="hidden md:inline-flex items-center px-4 py-2 rounded-md shadow text-black font-medium transition-colors"
+              style={{ 
+                backgroundColor: '#f59e0b', 
+                color: '#000',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#d97706';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#f59e0b';
+              }}
+            >
+              <Users className="size-4 mr-2" />
+              Join Event
             </Link>
             <Link
               href="/auth/login"

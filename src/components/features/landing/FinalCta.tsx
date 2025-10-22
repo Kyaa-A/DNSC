@@ -27,8 +27,10 @@ export function FinalCta() {
               <p className="text-sm font-medium text-gray-600 mb-1">Experience the platform</p>
               <div className="text-2xl font-bold text-gray-900 mb-4">Start Free Today</div>
               <Button className="mt-2 h-12 w-full px-6 text-base bg-yellow-400 text-black hover:bg-yellow-500 shadow-md hover:shadow-lg transition-all duration-200 group">
-                {FINAL_CTA.ctaText}
-                <ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
+                <span className="flex items-center justify-center">
+                  {FINAL_CTA.ctaText}
+                  <ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
+                </span>
               </Button>
               <p className="mt-3 text-xs text-gray-500">No commitment required</p>
               

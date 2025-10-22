@@ -152,7 +152,6 @@ export function OrganizerNav() {
               className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent 

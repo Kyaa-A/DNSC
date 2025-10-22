@@ -132,7 +132,7 @@ export function StudentsTable({ searchQuery = '', filters = {} }: StudentsTableP
                     <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                       {student.fullName}
                     </p>
-                    <span className="inline-flex items-center rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-300">
+                    <span className="inline-flex items-center rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-200">
                       {student.studentId}
                     </span>
                   </div>
@@ -146,7 +146,6 @@ export function StudentsTable({ searchQuery = '', filters = {} }: StudentsTableP
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
                       <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -191,13 +190,13 @@ export function StudentsTable({ searchQuery = '', filters = {} }: StudentsTableP
                 {safeStudents.length > 0 ? (
                   safeStudents.map((student) => (
                     <TableRow key={student.id} className="hover:bg-yellow-50/40 dark:hover:bg-yellow-900/20">
-                      <TableCell className="font-medium dark:text-gray-100">{student.studentId}</TableCell>
-                      <TableCell className="font-medium dark:text-gray-100">
+                      <TableCell className="font-medium text-gray-900 dark:text-gray-100">{student.studentId}</TableCell>
+                      <TableCell className="font-medium text-gray-900 dark:text-gray-100">
                         {student.fullName}
                       </TableCell>
                       <TableCell className="text-gray-600 dark:text-gray-400 max-w-[260px] truncate">{student.email}</TableCell>
-                      <TableCell className="dark:text-gray-300">{getProgramName(student.program)}</TableCell>
-                      <TableCell className="dark:text-gray-300">{student.year}</TableCell>
+                      <TableCell className="text-gray-700 dark:text-gray-300">{getProgramName(student.program)}</TableCell>
+                      <TableCell className="text-gray-700 dark:text-gray-300">{student.year}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

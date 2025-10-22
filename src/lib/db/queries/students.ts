@@ -248,7 +248,7 @@ export async function getStudents(options: {
   dateTo?: string;
   orderBy?: 'studentIdNumber' | 'firstName' | 'lastName' | 'email' | 'year' | 'createdAt';
   orderDirection?: 'asc' | 'desc';
-} = {}): Promise<StudentWithProgram[]> {
+} = {}): Promise<ScanningStudent[]> {
   try {
     const {
       page = 1,
@@ -337,16 +337,12 @@ export async function getStudents(options: {
 
     return students.map(student => ({
       id: student.id,
-      studentIdNumber: student.studentIdNumber,
-      firstName: student.firstName,
-      lastName: student.lastName,
+      studentId: student.studentIdNumber,
+      fullName: `${student.firstName} ${student.lastName}`,
       email: student.email,
+      program: student.program.name,
       year: student.year,
-      programId: student.programId,
-      registrationSource: student.registrationSource,
-      createdAt: student.createdAt,
-      updatedAt: student.updatedAt,
-      program: student.program,
+      isActive: true, // Placeholder - assume active
     }));
 
   } catch (error) {
