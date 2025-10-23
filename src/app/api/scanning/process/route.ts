@@ -245,10 +245,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate scans and validate scan sequence
+    // Get existing attendance record for this student in this session
+    // We only need one record per student per session since we'll update it for both time_in and time_out
+    // This prevents duplicate records and ensures proper attendance tracking
+    let existingRecord = null;
     if (studentValidation.isValid && studentValidation.student) {
-      // Get all existing attendance records for this student in this session
-      const existingRecords = await prisma.attendance.findMany({
+      existingRecord = await prisma.attendance.findFirst({
         where: {
           studentId: studentValidation.student.id,
           sessionId: validatedData.sessionId,
@@ -256,29 +258,8 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       });
 
-      const timeInRecord = existingRecords.find(record => record.scanType === 'time_in');
-      const timeOutRecord = existingRecords.find(record => record.scanType === 'time_out');
-
-      // Check for duplicate scan of the same type
-      const sameTypeRecord = existingRecords.find(record => record.scanType === scanType.type);
-      
-      if (sameTypeRecord) {
-        const timeSinceLastScan = Math.floor(
-          (currentTime.getTime() - sameTypeRecord.createdAt.getTime()) / (1000 * 60)
-        );
-
-        return NextResponse.json(
-          { 
-            success: false, 
-            error: 'Duplicate scan',
-            message: `You have already scanned ${scanType.type} for this session. Last scan was ${timeSinceLastScan} minutes ago.`
-          },
-          { status: 409 }
-        );
-      }
-
-      // Validate scan sequence
-      if (scanType.type === 'time_out' && !timeInRecord) {
+      // Validate scan sequence and prevent duplicates
+      if (scanType.type === 'time_out' && !existingRecord) {
         return NextResponse.json(
           { 
             success: false, 
@@ -289,7 +270,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (scanType.type === 'time_in' && timeInRecord) {
+      if (scanType.type === 'time_in' && existingRecord && existingRecord.timeIn) {
         return NextResponse.json(
           { 
             success: false, 
@@ -300,7 +281,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (scanType.type === 'time_out' && timeOutRecord) {
+      if (scanType.type === 'time_out' && existingRecord && existingRecord.timeOut) {
         return NextResponse.json(
           { 
             success: false, 
@@ -312,23 +293,45 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create attendance record
+    // Create or update attendance record
+    // For time_in: Create new record if none exists
+    // For time_out: Update existing record to add timeOut timestamp
     let attendanceRecord: AttendanceRecord | null = null;
     
     if (studentValidation.isValid && studentValidation.student) {
-      const newAttendance = await prisma.attendance.create({
-        data: {
-          studentId: studentValidation.student.id,
-          sessionId: validatedData.sessionId,
-          eventId: session.eventId,
-          scanType: scanType.type as ScanActionType,
-          scannedBy: validatedData.organizerId,
-          timeIn: scanType.type === 'time_in' ? currentTime : null,
-          timeOut: scanType.type === 'time_out' ? currentTime : null,
-          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
-          userAgent: validatedData.metadata?.userAgent || request.headers.get('user-agent') || null,
-        },
-      });
+      let newAttendance;
+      
+      if (scanType.type === 'time_in') {
+        // Create new attendance record for time_in
+        newAttendance = await prisma.attendance.create({
+          data: {
+            studentId: studentValidation.student.id,
+            sessionId: validatedData.sessionId,
+            eventId: session.eventId,
+            scanType: scanType.type as ScanActionType,
+            scannedBy: validatedData.organizerId,
+            timeIn: currentTime,
+            timeOut: null,
+            ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+            userAgent: validatedData.metadata?.userAgent || request.headers.get('user-agent') || null,
+          },
+        });
+      } else if (scanType.type === 'time_out' && existingRecord) {
+        // Update existing attendance record for time_out
+        newAttendance = await prisma.attendance.update({
+          where: { id: existingRecord.id },
+          data: {
+            timeOut: currentTime,
+            scanType: 'time_out', // Update scanType to reflect the latest action
+            scannedBy: validatedData.organizerId,
+            ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+            userAgent: validatedData.metadata?.userAgent || request.headers.get('user-agent') || null,
+          },
+        });
+      } else {
+        // This should not happen due to validation above, but handle gracefully
+        throw new Error('Invalid scan type or missing existing record for time_out');
+      }
 
       attendanceRecord = {
         id: newAttendance.id,
