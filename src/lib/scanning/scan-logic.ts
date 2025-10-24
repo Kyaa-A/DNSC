@@ -237,12 +237,14 @@ export function determineTimeInOrOut(
     lateScanMinutes = 30,
   } = options;
 
-  // Check time-in window
+  // PRIORITY 1: Check actual time windows first (no grace periods)
+  // This prevents conflicts when time windows are close together
+  
+  // Check if we're in the actual time-in window
   if (timeWindows.timeIn) {
     const timeInStart = new Date(timeWindows.timeIn.start);
     const timeInEnd = new Date(timeWindows.timeIn.end);
     
-    // Check if we're in the time-in window
     if (currentTime >= timeInStart && currentTime <= timeInEnd) {
       return {
         type: 'time_in',
@@ -252,6 +254,64 @@ export function determineTimeInOrOut(
         currentTime,
       };
     }
+  }
+
+  // Check if we're in the actual time-out window
+  if (timeWindows.timeOut) {
+    const timeOutStart = new Date(timeWindows.timeOut.start);
+    const timeOutEnd = new Date(timeWindows.timeOut.end);
+    
+    if (currentTime >= timeOutStart && currentTime <= timeOutEnd) {
+      return {
+        type: 'time_out',
+        reason: 'Within time-out window',
+        isAllowed: true,
+        timeWindow: timeWindows.timeOut,
+        currentTime,
+      };
+    }
+  }
+
+  // PRIORITY 2: Check grace periods for time-out (early/late scans)
+  // Time-out grace periods take precedence over time-in grace periods
+  if (timeWindows.timeOut) {
+    const timeOutStart = new Date(timeWindows.timeOut.start);
+    const timeOutEnd = new Date(timeWindows.timeOut.end);
+    
+    // Check if we're early for time-out
+    if (allowEarlyScan && currentTime < timeOutStart) {
+      const minutesEarly = Math.floor((timeOutStart.getTime() - currentTime.getTime()) / (1000 * 60));
+      if (minutesEarly <= earlyScanMinutes) {
+        return {
+          type: 'time_out',
+          reason: `Early time-out scan (${minutesEarly} minutes early)`,
+          isAllowed: true,
+          timeWindow: timeWindows.timeOut,
+          currentTime,
+        };
+      }
+    }
+
+    // Check if we're late for time-out
+    if (allowLateScan && currentTime > timeOutEnd) {
+      const minutesLate = Math.floor((currentTime.getTime() - timeOutEnd.getTime()) / (1000 * 60));
+      if (minutesLate <= lateScanMinutes) {
+        return {
+          type: 'time_out',
+          reason: `Late time-out scan (${minutesLate} minutes late)`,
+          isAllowed: true,
+          timeWindow: timeWindows.timeOut,
+          currentTime,
+        };
+      }
+    }
+  }
+
+  // PRIORITY 3: Check grace periods for time-in (early/late scans)
+  // Only if we haven't matched time-out window or its grace periods
+  if (timeWindows.timeIn) {
+    const timeInStart = new Date(timeWindows.timeIn.start);
+    const timeInEnd = new Date(timeWindows.timeIn.end);
 
     // Check if we're early for time-in
     if (allowEarlyScan && currentTime < timeInStart) {
@@ -276,51 +336,6 @@ export function determineTimeInOrOut(
           reason: `Late time-in scan (${minutesLate} minutes late)`,
           isAllowed: true,
           timeWindow: timeWindows.timeIn,
-          currentTime,
-        };
-      }
-    }
-  }
-
-  // Check time-out window
-  if (timeWindows.timeOut) {
-    const timeOutStart = new Date(timeWindows.timeOut.start);
-    const timeOutEnd = new Date(timeWindows.timeOut.end);
-    
-    // Check if we're in the time-out window
-    if (currentTime >= timeOutStart && currentTime <= timeOutEnd) {
-      return {
-        type: 'time_out',
-        reason: 'Within time-out window',
-        isAllowed: true,
-        timeWindow: timeWindows.timeOut,
-        currentTime,
-      };
-    }
-
-    // Check if we're early for time-out
-    if (allowEarlyScan && currentTime < timeOutStart) {
-      const minutesEarly = Math.floor((timeOutStart.getTime() - currentTime.getTime()) / (1000 * 60));
-      if (minutesEarly <= earlyScanMinutes) {
-        return {
-          type: 'time_out',
-          reason: `Early time-out scan (${minutesEarly} minutes early)`,
-          isAllowed: true,
-          timeWindow: timeWindows.timeOut,
-          currentTime,
-        };
-      }
-    }
-
-    // Check if we're late for time-out
-    if (allowLateScan && currentTime > timeOutEnd) {
-      const minutesLate = Math.floor((currentTime.getTime() - timeOutEnd.getTime()) / (1000 * 60));
-      if (minutesLate <= lateScanMinutes) {
-        return {
-          type: 'time_out',
-          reason: `Late time-out scan (${minutesLate} minutes late)`,
-          isAllowed: true,
-          timeWindow: timeWindows.timeOut,
           currentTime,
         };
       }

@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 interface SessionFormProps {
   eventId: string;
+  session?: SessionFormData & { id?: string }; // Optional session for editing
   onSubmit: (sessionData: SessionFormData) => Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
@@ -30,7 +31,7 @@ export interface SessionFormData {
   requireRegistration?: boolean;
 }
 
-export function SessionForm({ eventId: _eventId, onSubmit, onCancel, isSubmitting = false }: SessionFormProps) {
+export function SessionForm({ eventId: _eventId, session, onSubmit, onCancel, isSubmitting = false }: SessionFormProps) {
   const {
     register,
     handleSubmit,
@@ -40,7 +41,18 @@ export function SessionForm({ eventId: _eventId, onSubmit, onCancel, isSubmittin
     watch,
     reset,
   } = useForm<SessionFormData>({
-    defaultValues: {
+    defaultValues: session ? {
+      name: session.name,
+      description: session.description || '',
+      timeInStart: new Date(session.timeInStart),
+      timeInEnd: new Date(session.timeInEnd),
+      timeOutStart: new Date(session.timeOutStart),
+      timeOutEnd: new Date(session.timeOutEnd),
+      organizerIds: session.organizerIds || [],
+      maxCapacity: session.maxCapacity,
+      allowWalkIns: session.allowWalkIns ?? true,
+      requireRegistration: session.requireRegistration ?? false,
+    } : {
       name: '',
       description: '',
       timeInStart: new Date(),

@@ -207,25 +207,22 @@ export async function POST(request: NextRequest) {
       scanType
     });
     
-    // Get all existing attendance records for this student in this session
-    const allAttendanceForStudent = await prisma.attendance.findMany({
+    // Get existing attendance record for this student in this session
+    // We only need one record per student per session (stores both timeIn and timeOut)
+    const existingRecord = await prisma.attendance.findFirst({
       where: {
         studentId: student.id,
         sessionId,
       },
+      orderBy: { createdAt: 'desc' },
     });
-    console.log('🔍 All attendance records for this student in this session:', allAttendanceForStudent);
+    console.log('🔍 Existing attendance record:', existingRecord);
 
-    const timeInRecord = allAttendanceForStudent.find(record => record.scanType === 'time_in');
-    const timeOutRecord = allAttendanceForStudent.find(record => record.scanType === 'time_out');
-
-    // Check for duplicate scan of the same type
-    const sameTypeRecord = allAttendanceForStudent.find(record => record.scanType === scanType);
-    
-    if (sameTypeRecord) {
+    // Validate scan sequence and prevent duplicates
+    if (scanType === 'time_in' && existingRecord && existingRecord.timeIn) {
       await logSystemEvent(
         'attendance_recording_failed',
-        `Attendance recording failed: Duplicate attendance record (Student: ${studentId}, Session: ${sessionId}, Type: ${scanType})`,
+        `Attendance recording failed: Time-in already recorded (Student: ${studentId}, Session: ${sessionId})`,
         'warning',
         {
           sessionId,
@@ -242,7 +239,7 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json({ 
         error: 'Attendance already recorded',
-        message: `${scanType === 'time_in' ? 'Time in' : 'Time out'} already recorded for this student in this session`,
+        message: 'Time in already recorded for this student in this session',
         student: {
           id: student.id,
           studentIdNumber: student.studentIdNumber,
@@ -251,15 +248,51 @@ export async function POST(request: NextRequest) {
           email: student.email,
         },
         existingAttendance: {
-          timeIn: sameTypeRecord.timeIn,
-          timeOut: sameTypeRecord.timeOut,
-          createdAt: sameTypeRecord.createdAt,
+          timeIn: existingRecord.timeIn,
+          timeOut: existingRecord.timeOut,
+          createdAt: existingRecord.createdAt,
         }
       }, { status: 409 });
     }
 
-    // Validate scan sequence
-    if (scanType === 'time_out' && !timeInRecord) {
+    if (scanType === 'time_out' && existingRecord && existingRecord.timeOut) {
+      await logSystemEvent(
+        'attendance_recording_failed',
+        `Attendance recording failed: Time-out already recorded (Student: ${studentId}, Session: ${sessionId})`,
+        'warning',
+        {
+          sessionId,
+          eventId: session.event.id,
+          studentId,
+          organizerId: organizer.id,
+          errorType: 'duplicate_attendance',
+          processingDuration: Date.now() - startTime,
+          ipAddress,
+          userAgent,
+          referer,
+        }
+      );
+      
+      return NextResponse.json({ 
+        error: 'Attendance already recorded',
+        message: 'Time out already recorded for this student in this session',
+        student: {
+          id: student.id,
+          studentIdNumber: student.studentIdNumber,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          email: student.email,
+        },
+        existingAttendance: {
+          timeIn: existingRecord.timeIn,
+          timeOut: existingRecord.timeOut,
+          createdAt: existingRecord.createdAt,
+        }
+      }, { status: 409 });
+    }
+
+    // Validate scan sequence - cannot check out without checking in first
+    if (scanType === 'time_out' && !existingRecord) {
       await logSystemEvent(
         'attendance_recording_failed',
         `Attendance recording failed: Cannot scan time-out without time-in (Student: ${studentId}, Session: ${sessionId})`,
@@ -290,20 +323,43 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Create attendance record (use student.id which is the database ID)
-    const attendance = await prisma.attendance.create({
-      data: {
-        studentId: student.id,
-        eventId: session.event.id,
-        sessionId,
-        timeIn: scanType === 'time_in' ? new Date() : null,
-        timeOut: scanType === 'time_out' ? new Date() : null,
-        scanType,
-        scannedBy: organizer.id,
-        ipAddress,
-        userAgent,
-      },
-    });
+    // Create or update attendance record
+    // For time_in: Create new record
+    // For time_out: Update existing record with timeOut timestamp
+    let attendance;
+    
+    if (scanType === 'time_in') {
+      // Create new attendance record for time-in
+      attendance = await prisma.attendance.create({
+        data: {
+          studentId: student.id,
+          eventId: session.event.id,
+          sessionId,
+          scanType: 'time_in',
+          scannedBy: organizer.id,
+          timeIn: new Date(),
+          timeOut: null,
+          ipAddress,
+          userAgent,
+        },
+      });
+    } else if (existingRecord) {
+      // Update existing record for time-out
+      // existingRecord is guaranteed to exist here due to validation above
+      attendance = await prisma.attendance.update({
+        where: { id: existingRecord.id },
+        data: {
+          timeOut: new Date(),
+          scanType: 'time_out', // Update scanType to reflect the latest action
+          scannedBy: organizer.id,
+          ipAddress,
+          userAgent,
+        },
+      });
+    } else {
+      // This should never happen due to validation above
+      throw new Error('Invalid state: existingRecord is null for time_out scan');
+    }
 
     const processingDuration = Date.now() - startTime;
 

@@ -26,6 +26,117 @@ import {
   EventManagementLoadingOverlay 
 } from '@/components/admin/EventLoadingStates';
 
+// Separate component for session details to avoid IIFE issues
+function SessionDetailsView({ 
+  selectedEvent, 
+  selectedSessionId, 
+  setIsViewSessionOpen, 
+  setIsEditSessionOpen 
+}: {
+  selectedEvent: EventWithDetails | null;
+  selectedSessionId: string | null;
+  setIsViewSessionOpen: (value: boolean) => void;
+  setIsEditSessionOpen: (value: boolean) => void;
+}): React.ReactNode {
+  if (!selectedEvent || !selectedSessionId) return null;
+  
+  const session = selectedEvent.sessions.find(s => s.id === selectedSessionId);
+  if (!session) return <p>Session not found.</p>;
+  
+  // Format date helper function with proper typing
+  const formatDateTime = (date: string | Date | unknown) => {
+    try {
+      return new Date(date as string | Date).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+  
+  return (
+    <div className="space-y-6">
+      {/* Session Information */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Session Name</h3>
+          <p className="text-base">{session.name}</p>
+        </div>
+        {session.description && (
+          <div className="col-span-2">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Description</h3>
+            <p className="text-base">{session.description}</p>
+          </div>
+        )}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Status</h3>
+          <p className="text-base">
+            {session.isActive ? (
+              <span className="text-green-600 dark:text-green-400">Active</span>
+            ) : (
+              <span className="text-gray-600 dark:text-gray-400">Inactive</span>
+            )}
+          </p>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Event</h3>
+          <p className="text-base">{selectedEvent.name}</p>
+        </div>
+      </div>
+
+      {/* Time Windows */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Time Windows</h3>
+        <div className="space-y-3">
+          <div className="p-3 border dark:border-gray-700 rounded-lg">
+            <p className="text-sm font-medium mb-1">Time In Window</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {formatDateTime(session.timeInStart)} - {formatDateTime(session.timeInEnd)}
+            </p>
+          </div>
+          {session.timeOutStart != null && session.timeOutEnd != null && (
+            <div className="p-3 border dark:border-gray-700 rounded-lg">
+              <p className="text-sm font-medium mb-1">Time Out Window</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {formatDateTime(session.timeOutStart)} - {formatDateTime(session.timeOutEnd)}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Attendance Stats */}
+      {'_count' in session && session._count ? (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Attendance Statistics</h3>
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <p className="text-2xl font-bold">
+              {(session._count as { attendance?: number }).attendance || 0}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Total Attendance Records</p>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
+        <Button variant="outline" onClick={() => setIsViewSessionOpen(false)}>
+          Close
+        </Button>
+        <Button onClick={() => {
+          setIsViewSessionOpen(false);
+          setIsEditSessionOpen(true);
+        }}>
+          Edit Session
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function EventManagementSplitPane() {
   const [events, setEvents] = useState<EventWithDetails[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventWithDetails | null>(null);
@@ -35,8 +146,14 @@ export function EventManagementSplitPane() {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState<boolean>(false);
   const [isCreateSessionOpen, setIsCreateSessionOpen] = useState<boolean>(false);
-  const [isCreatingSession, setIsCreatingSession] = useState<boolean>(false);
+  const [isCreatingSession] = useState<boolean>(false);
   const [showOrganizerAssignments, setShowOrganizerAssignments] = useState<boolean>(false);
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState<boolean>(false);
+  const [viewDetailsEvent, setViewDetailsEvent] = useState<EventWithDetails | null>(null);
+  const [isViewSessionOpen, setIsViewSessionOpen] = useState<boolean>(false);
+  const [isEditSessionOpen, setIsEditSessionOpen] = useState<boolean>(false);
+  const [isDeleteSessionOpen, setIsDeleteSessionOpen] = useState<boolean>(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [filters, setFilters] = useState<EventFiltersModel>({
     search: '',
     status: 'all',
@@ -159,12 +276,27 @@ export function EventManagementSplitPane() {
     }
   };
 
-  const handleEditEvent = () => {
+  const handleViewDetails = (event: EventWithDetails) => {
+    setViewDetailsEvent(event);
+    setIsViewDetailsOpen(true);
+  };
+
+  const handleEditEvent = (event?: EventWithDetails) => {
+    // If event is provided (from list action), select it first
+    if (event) {
+      setSelectedEvent(event);
+    }
     setIsEditOpen(true);
   };
 
-  const handleDeleteEvent = () => {
-    console.log('Delete button clicked for event:', selectedEvent?.id, selectedEvent?.name);
+  const handleDeleteEvent = (event?: EventWithDetails) => {
+    // If event is provided (from list action), select it first
+    if (event) {
+      console.log('Delete button clicked for event:', event.id, event.name);
+      setSelectedEvent(event);
+    } else {
+      console.log('Delete button clicked for event:', selectedEvent?.id, selectedEvent?.name);
+    }
     setIsDeleteOpen(true);
   };
 
@@ -283,6 +415,79 @@ export function EventManagementSplitPane() {
       await fetchEvents();
     } catch (err: unknown) {
       eventFeedback.create.error(eventName, err instanceof Error ? err.message : 'Failed to create event', String(toastId));
+    }
+  };
+
+  const handleViewSession = async (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+    setIsViewSessionOpen(true);
+  };
+
+  const handleEditSession = async (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+    setIsEditSessionOpen(true);
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    setSelectedSessionId(sessionId);
+    setIsDeleteSessionOpen(true);
+  };
+
+  const handleDeleteSessionConfirm = async () => {
+    if (!selectedSessionId || !selectedEvent) return;
+
+    const session = selectedEvent.sessions.find(s => s.id === selectedSessionId);
+    const sessionName = session?.name || 'Session';
+    const toastId = sessionFeedback.delete.loading(sessionName);
+
+    try {
+      const response = await fetch(`/api/admin/sessions/${selectedSessionId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        sessionFeedback.delete.success(sessionName, String(toastId));
+        setIsDeleteSessionOpen(false);
+        setSelectedSessionId(null);
+        await fetchEvents(); // Refresh to get updated session data
+      } else {
+        throw new Error(data.error || 'Failed to delete session');
+      }
+    } catch (err: unknown) {
+      sessionFeedback.delete.error(sessionName, err instanceof Error ? err.message : 'Failed to delete session', String(toastId));
+    }
+  };
+
+  const handleEditSessionSubmit = async (sessionData: SessionFormData) => {
+    if (!selectedSessionId || !selectedEvent) return;
+
+    const session = selectedEvent.sessions.find(s => s.id === selectedSessionId);
+    const sessionName = session?.name || 'Session';
+    const toastId = sessionFeedback.update.loading(sessionName);
+
+    try {
+      const response = await fetch(`/api/admin/sessions/${selectedSessionId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        sessionFeedback.update.success(sessionName, String(toastId));
+        setIsEditSessionOpen(false);
+        setSelectedSessionId(null);
+        await fetchEvents(); // Refresh to get updated session data
+      } else {
+        throw new Error(data.error || 'Failed to update session');
+      }
+    } catch (err: unknown) {
+      sessionFeedback.update.error(sessionName, err instanceof Error ? err.message : 'Failed to update session', String(toastId));
     }
   };
 
@@ -423,7 +628,7 @@ export function EventManagementSplitPane() {
             events={events}
             selectedEventId={selectedEvent?.id ?? null}
             onEventSelect={handleEventSelect}
-            onViewDetails={handleEventSelect}
+            onViewDetails={handleViewDetails}
             onEditEvent={handleEditEvent}
             onDeleteEvent={handleDeleteEvent}
             onAssignmentChange={fetchEvents}
@@ -475,9 +680,9 @@ export function EventManagementSplitPane() {
             <EventDetailTabs
               event={selectedEvent}
               onCreateSession={handleCreateSession}
-              onViewSession={() => {}}
-              onEditSession={() => {}}
-              onDeleteSession={() => {}}
+              onViewSession={handleViewSession}
+              onEditSession={handleEditSession}
+              onDeleteSession={handleDeleteSession}
               onAssignOrganizer={() => setShowOrganizerAssignments(true)}
               onViewOrganizer={handleViewOrganizer}
               onRemoveOrganizer={handleRemoveOrganizer}
@@ -561,6 +766,251 @@ export function EventManagementSplitPane() {
               onCancel={() => setIsCreateSessionOpen(false)}
               isSubmitting={isCreatingSession}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Session Details Dialog */}
+      <Dialog open={isViewSessionOpen} onOpenChange={setIsViewSessionOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Session Details</DialogTitle>
+            <DialogDescription>
+              Complete information about this session.
+            </DialogDescription>
+          </DialogHeader>
+          <SessionDetailsView 
+            selectedEvent={selectedEvent}
+            selectedSessionId={selectedSessionId}
+            setIsViewSessionOpen={setIsViewSessionOpen}
+            setIsEditSessionOpen={setIsEditSessionOpen}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Session Dialog */}
+      <Dialog open={isEditSessionOpen} onOpenChange={setIsEditSessionOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Session</DialogTitle>
+            <DialogDescription>
+              Update session details and time windows.
+            </DialogDescription>
+          </DialogHeader>
+          {(() => {
+            if (!selectedEvent || !selectedSessionId) return null;
+            const session = selectedEvent.sessions.find(s => s.id === selectedSessionId);
+            if (!session) return <p>Session not found.</p>;
+            
+            return (
+              <SessionForm
+                eventId={selectedEvent.id}
+                session={{
+                  id: session.id,
+                  name: session.name,
+                  description: session.description || undefined,
+                  timeInStart: new Date(session.timeInStart),
+                  timeInEnd: new Date(session.timeInEnd),
+                  timeOutStart: session.timeOutStart ? new Date(session.timeOutStart) : new Date(Date.now() + 60 * 60 * 1000),
+                  timeOutEnd: session.timeOutEnd ? new Date(session.timeOutEnd) : new Date(Date.now() + 90 * 60 * 1000),
+                }}
+                onSubmit={handleEditSessionSubmit}
+                onCancel={() => {
+                  setIsEditSessionOpen(false);
+                  setSelectedSessionId(null);
+                }}
+                isSubmitting={false}
+              />
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Session Dialog */}
+      <Dialog open={isDeleteSessionOpen} onOpenChange={setIsDeleteSessionOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Session</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{selectedEvent && selectedSessionId && selectedEvent.sessions.find(s => s.id === selectedSessionId)?.name}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => {
+              setIsDeleteSessionOpen(false);
+              setSelectedSessionId(null);
+            }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteSessionConfirm}>
+              Delete Session
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog open={isViewDetailsOpen} onOpenChange={setIsViewDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Event Details: {viewDetailsEvent?.name}</DialogTitle>
+            <DialogDescription>
+              Complete information about this event including sessions, organizers, and attendance.
+            </DialogDescription>
+          </DialogHeader>
+          {viewDetailsEvent && (
+            <div className="space-y-6">
+              {/* Event Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Event Name</h3>
+                  <p className="text-base">{viewDetailsEvent.name}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Status</h3>
+                  <p className="text-base">
+                    {viewDetailsEvent.isActive ? (
+                      <span className="text-green-600 dark:text-green-400">Active</span>
+                    ) : (
+                      <span className="text-gray-600 dark:text-gray-400">Inactive</span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Start Date</h3>
+                  <p className="text-base">
+                    {new Date(viewDetailsEvent.startDate).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">End Date</h3>
+                  <p className="text-base">
+                    {new Date(viewDetailsEvent.endDate).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+                {viewDetailsEvent.location && (
+                  <div className="col-span-2">
+                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Location</h3>
+                    <p className="text-base">{viewDetailsEvent.location}</p>
+                  </div>
+                )}
+                {viewDetailsEvent.description && (
+                  <div className="col-span-2">
+                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Description</h3>
+                    <p className="text-base">{viewDetailsEvent.description}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Sessions */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+                  Sessions ({viewDetailsEvent._count?.sessions || 0})
+                </h3>
+                {viewDetailsEvent.sessions && viewDetailsEvent.sessions.length > 0 ? (
+                  <div className="space-y-2">
+                    {viewDetailsEvent.sessions.map((session) => (
+                      <div 
+                        key={session.id} 
+                        className="p-3 border dark:border-gray-700 rounded-lg flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="font-medium">{session.name}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {new Date(session.timeInStart).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })} - {new Date(session.timeInEnd).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                        <div>
+                          {session.isActive ? (
+                            <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No sessions created yet.</p>
+                )}
+              </div>
+
+              {/* Organizers */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+                  Organizers ({viewDetailsEvent._count?.organizerAssignments || 0})
+                </h3>
+                {viewDetailsEvent.organizerAssignments && viewDetailsEvent.organizerAssignments.length > 0 ? (
+                  <div className="space-y-2">
+                    {viewDetailsEvent.organizerAssignments.map((assignment) => (
+                      <div 
+                        key={assignment.id} 
+                        className="p-3 border dark:border-gray-700 rounded-lg flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="font-medium">{assignment.organizer.fullName}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{assignment.organizer.email}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded capitalize">
+                            {assignment.organizer.role}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No organizers assigned yet.</p>
+                )}
+              </div>
+
+              {/* Attendance Stats */}
+              {viewDetailsEvent._count?.attendance !== undefined && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Attendance Statistics</h3>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-2xl font-bold">{viewDetailsEvent._count.attendance}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Attendance Records</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
+                <Button variant="outline" onClick={() => setIsViewDetailsOpen(false)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  setIsViewDetailsOpen(false);
+                  setSelectedEvent(viewDetailsEvent);
+                  setIsEditOpen(true);
+                }}>
+                  Edit Event
+                </Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
