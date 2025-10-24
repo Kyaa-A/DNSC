@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Search, Filter, Download, RotateCcw } from 'lucide-react';
 
 interface SessionOption {
   id: string;
@@ -15,16 +19,15 @@ interface AttendanceFiltersProps {
   sessions: SessionOption[];
   selectedSessionIds?: string[];
   onSelectionChange?: (sessionIds: string[]) => void;
-  selectedStatuses?: AttendanceStatus[];
-  onStatusesChange?: (statuses: AttendanceStatus[]) => void;
+  selectedStatus?: AttendanceStatus | null;
+  onStatusChange?: (status: AttendanceStatus | null) => void;
   query?: string;
   onQueryChange?: (q: string) => void;
   eventId?: string;
   className?: string;
 }
 
-type AttendanceStatus = 'present' | 'checked-in' | 'checked-out' | 'absent';
-type ScanType = 'time_in' | 'time_out';
+type AttendanceStatus = 'present' | 'absent' | 'checked-in-only';
 
 const parseFromUrl = (): string[] => {
   if (typeof window === 'undefined') return [];
@@ -34,15 +37,12 @@ const parseFromUrl = (): string[] => {
   return raw.split(',').filter(Boolean);
 };
 
-const parseStatusesFromUrl = (): AttendanceStatus[] => {
-  if (typeof window === 'undefined') return [];
+const parseStatusFromUrl = (): AttendanceStatus | null => {
+  if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
-  const raw = params.get('statuses');
-  if (!raw) return [];
-  return raw
-    .split(',')
-    .map((v) => v.trim())
-    .filter((v): v is AttendanceStatus => ['present', 'checked-in', 'checked-out', 'absent'].includes(v));
+  const raw = params.get('status');
+  if (!raw) return null;
+  return ['present', 'absent', 'checked-in-only'].includes(raw) ? raw as AttendanceStatus : null;
 };
 
 const writeSessionsToUrl = (ids: string[]) => {
@@ -55,12 +55,12 @@ const writeSessionsToUrl = (ids: string[]) => {
   window.history.pushState({}, '', url.toString());
 };
 
-const writeStatusesToUrl = (statuses: AttendanceStatus[]) => {
+const writeStatusToUrl = (status: AttendanceStatus | null) => {
   const url = new URL(window.location.href);
-  if (statuses.length > 0) {
-    url.searchParams.set('statuses', statuses.join(','));
+  if (status) {
+    url.searchParams.set('status', status);
   } else {
-    url.searchParams.delete('statuses');
+    url.searchParams.delete('status');
   }
   window.history.pushState({}, '', url.toString());
 };
@@ -81,11 +81,11 @@ const writeQueryToUrl = (q: string) => {
   window.history.pushState({}, '', url.toString());
 };
 
-export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionChange, selectedStatuses, onStatusesChange, query, onQueryChange, eventId, className }: AttendanceFiltersProps) {
+export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionChange, selectedStatus, onStatusChange, query, onQueryChange, eventId, className }: AttendanceFiltersProps) {
   const initial = useMemo(() => (selectedSessionIds && selectedSessionIds.length > 0 ? selectedSessionIds : parseFromUrl()), [selectedSessionIds]);
   const [selected, setSelected] = useState<string[]>(initial);
-  const initialStatuses = useMemo(() => (selectedStatuses && selectedStatuses.length > 0 ? selectedStatuses : parseStatusesFromUrl()), [selectedStatuses]);
-  const [statuses, setStatuses] = useState<AttendanceStatus[]>(initialStatuses);
+  const initialStatus = useMemo(() => (selectedStatus ? selectedStatus : parseStatusFromUrl()), [selectedStatus]);
+  const [status, setStatus] = useState<AttendanceStatus | null>(initialStatus);
   const initialQuery = useMemo(() => (typeof query === 'string' ? query : parseQueryFromUrl()), [query]);
   const [localQuery, setLocalQuery] = useState<string>(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState<string>(initialQuery);
@@ -93,7 +93,6 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
   const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
-  const [selectedScanTypes, setSelectedScanTypes] = useState<ScanType[]>([]);
 
   // Keep selection in sync with URL changes (back/forward)
   useEffect(() => {
@@ -101,9 +100,9 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
       const ids = parseFromUrl();
       setSelected(ids);
       onSelectionChange?.(ids);
-      const sts = parseStatusesFromUrl();
-      setStatuses(sts);
-      onStatusesChange?.(sts);
+      const sts = parseStatusFromUrl();
+      setStatus(sts);
+      onStatusChange?.(sts);
       const q = parseQueryFromUrl();
       setLocalQuery(q);
       onQueryChange?.(q);
@@ -120,9 +119,9 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
   }, [selected.join(',')]);
 
   useEffect(() => {
-    onStatusesChange?.(statuses);
+    onStatusChange?.(status);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statuses.join(',')]);
+  }, [status]);
 
   // Debounce query typing
   useEffect(() => {
@@ -139,26 +138,25 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
   const applyFilters = useCallback(() => {
     // Write all filters to URL at once
     writeSessionsToUrl(selected);
-    writeStatusesToUrl(statuses);
+    writeStatusToUrl(status);
     writeQueryToUrl(localQuery);
     // Notify listeners (useAttendance) by dispatching popstate
     window.dispatchEvent(new PopStateEvent('popstate'));
-  }, [selected, statuses, localQuery]);
+  }, [selected, status, localQuery]);
 
   const buildExportUrl = useCallback((format: 'csv' | 'xlsx') => {
     const url = new URL(window.location.origin + `/api/admin/events/${eventId ?? ''}/attendance/export`);
     const sp = new URLSearchParams(window.location.search);
     // preserve known params
-    ['sessions', 'statuses', 'q', 'sort', 'order'].forEach((k) => {
+    ['sessions', 'status', 'q', 'sort', 'order'].forEach((k) => {
       const v = sp.get(k);
       if (v) url.searchParams.set(k, v);
     });
     if (selectedProgramIds.length > 0) url.searchParams.set('programIds', selectedProgramIds.join(','));
     if (selectedYears.length > 0) url.searchParams.set('years', selectedYears.join(','));
-    if (selectedScanTypes.length > 0) url.searchParams.set('scanTypes', selectedScanTypes.join(','));
     url.searchParams.set('format', format);
     return url.toString();
-  }, [eventId, selectedProgramIds, selectedYears, selectedScanTypes]);
+  }, [eventId, selectedProgramIds, selectedYears]);
 
   const handleExport = useCallback(async (format: 'csv' | 'xlsx') => {
     try {
@@ -218,121 +216,188 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
     return () => { ignore = true };
   }, []);
 
-  const toggle = useCallback((id: string) => {
-    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const clearAll = useCallback(() => {
+    setSelected([]);
+    setStatus(null);
+    setLocalQuery('');
   }, []);
-
-  const clearAll = useCallback(() => setSelected([]), []);
-  const toggleStatus = useCallback((st: AttendanceStatus) => {
-    setStatuses((prev) => (prev.includes(st) ? prev.filter((x) => x !== st) as AttendanceStatus[] : [...prev, st]));
-  }, []);
-  const clearStatuses = useCallback(() => setStatuses([]), []);
 
   return (
     <Card className={className}>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">Filters</CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="default" size="sm" onClick={applyFilters} aria-label="Apply filters">
-              Apply
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg font-semibold">Attendance Filters</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={applyFilters}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Apply Filters
             </Button>
-            <Button variant="default" size="sm" onClick={() => handleExport('csv')} disabled={downloading || !eventId} aria-disabled={downloading || !eventId} aria-label="Export CSV">
-              Export CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleExport('xlsx')} disabled={downloading || !eventId} aria-disabled={downloading || !eventId} aria-label="Export XLSX">
-              Export XLSX
-            </Button>
-            <Button variant="outline" size="sm" onClick={clearStatuses} disabled={statuses.length === 0} aria-disabled={statuses.length === 0}>
-              Clear Status
-            </Button>
-            <Button variant="outline" size="sm" onClick={clearAll} disabled={selected.length === 0} aria-disabled={selected.length === 0}>
-              Clear Sessions
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('csv')} 
+                disabled={downloading || !eventId}
+                className="h-8 px-3"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleExport('xlsx')} 
+                disabled={downloading || !eventId}
+                className="h-8 px-3"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                XLSX
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearAll}
+                className="h-8 px-3"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Clear All
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Export-only filters */}
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-muted-foreground">Export Filters</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {/* Programs */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium">Programs</div>
-                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-auto rounded border p-2">
-                  {programs.length === 0 ? (
-                    <div className="text-xs text-muted-foreground">No programs</div>
-                  ) : programs.map((p) => (
-                    <label key={p.id} className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={selectedProgramIds.includes(p.id)} onCheckedChange={() => setSelectedProgramIds(prev => prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id])} aria-label={`Export program ${p.name}`} />
-                      <span className="truncate" title={p.name}>{p.name}</span>
-                    </label>
-                  ))}
+        <Accordion type="multiple" className="space-y-2">
+          {/* Search Section */}
+          <AccordionItem value="search" className="border rounded-lg">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Search</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <Input
+                value={localQuery}
+                onChange={(e) => setLocalQuery(e.target.value)}
+                placeholder="Search name, email, student ID..."
+                className="w-full"
+                aria-label="Search attendees"
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Sessions Section */}
+          <AccordionItem value="sessions" className="border rounded-lg">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Sessions</span>
+                {selected.length > 0 && (
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                    {selected.length} selected
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <MultiSelect
+                options={sessions.map(s => ({ value: s.id, label: s.name }))}
+                value={selected}
+                onChange={setSelected}
+                placeholder="Select sessions..."
+                searchPlaceholder="Search sessions..."
+                emptyMessage="No sessions found."
+                maxDisplay={2}
+                className="w-full"
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Status Section */}
+          <AccordionItem value="status" className="border rounded-lg">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Status</span>
+                {status && (
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                    {status.replace('-', ' ')}
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <Select value={status || ''} onValueChange={(value) => setStatus(value as AttendanceStatus || null)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select attendance status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="present">Present (Checked in & out)</SelectItem>
+                  <SelectItem value="absent">Absent (No check-in)</SelectItem>
+                  <SelectItem value="checked-in-only">Checked In Only (Missing check-out)</SelectItem>
+                </SelectContent>
+              </Select>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Export Filters Section */}
+          <AccordionItem value="export" className="border rounded-lg">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <div className="flex items-center gap-2">
+                <Download className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Export Filters</span>
+                <span className="text-xs text-muted-foreground">(Optional)</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Programs */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Programs</div>
+                  <div className="grid grid-cols-1 gap-2 max-h-32 overflow-auto rounded border p-3">
+                    {programs.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">Loading programs...</div>
+                    ) : programs.map((p) => (
+                      <label key={p.id} className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox 
+                          checked={selectedProgramIds.includes(p.id)} 
+                          onCheckedChange={() => setSelectedProgramIds(prev => 
+                            prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                          )} 
+                        />
+                        <span className="text-sm">{p.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Year Levels */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Year Levels</div>
+                  <div className="grid grid-cols-3 gap-2 rounded border p-3">
+                    {[1,2,3,4,5].map((y) => (
+                      <label key={y} className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox 
+                          checked={selectedYears.includes(y)} 
+                          onCheckedChange={() => setSelectedYears(prev => 
+                            prev.includes(y) ? prev.filter(v => v !== y) : [...prev, y]
+                          )} 
+                        />
+                        <span className="text-sm">Year {y}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-              {/* Years */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium">Year Levels</div>
-                <div className="grid grid-cols-2 gap-2 rounded border p-2">
-                  {[1,2,3,4,5].map((y) => (
-                    <label key={y} className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={selectedYears.includes(y)} onCheckedChange={() => setSelectedYears(prev => prev.includes(y) ? prev.filter(v => v !== y) : [...prev, y])} aria-label={`Export year ${y}`} />
-                      <span>{y}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              {/* Scan Types */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium">Scan Types</div>
-                <div className="grid grid-cols-1 gap-2 rounded border p-2">
-                  {(['time_in','time_out'] as ScanType[]).map((st) => (
-                    <label key={st} className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={selectedScanTypes.includes(st)} onCheckedChange={() => setSelectedScanTypes(prev => prev.includes(st) ? prev.filter(v => v !== st) as ScanType[] : [...prev, st])} aria-label={`Export scan type ${st}`} />
-                      <span className="capitalize">{st.replace('_',' ')}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-muted-foreground">Search</div>
-            <Input
-              value={localQuery}
-              onChange={(e) => setLocalQuery(e.target.value)}
-              placeholder="Search name, email, student ID..."
-              aria-label="Search attendees"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-muted-foreground">Sessions</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2" role="group" aria-label="Session filters">
-              {sessions.map((s) => (
-                <label key={s.id} className="flex items-center gap-2 rounded border p-2 cursor-pointer">
-                  <Checkbox checked={selected.includes(s.id)} onCheckedChange={() => toggle(s.id)} aria-label={`Filter by session ${s.name}`} />
-                  <span className="truncate" title={s.name}>{s.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-muted-foreground">Status</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2" role="group" aria-label="Status filters">
-              {(['present', 'checked-in', 'checked-out', 'absent'] as AttendanceStatus[]).map((st) => (
-                <label key={st} className="flex items-center gap-2 rounded border p-2 cursor-pointer">
-                  <Checkbox checked={statuses.includes(st)} onCheckedChange={() => toggleStatus(st)} aria-label={`Filter by status ${st}`} />
-                  <span className="capitalize">{st.replace('-', ' ')}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </CardContent>
     </Card>
   );

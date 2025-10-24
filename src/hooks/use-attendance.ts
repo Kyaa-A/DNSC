@@ -12,7 +12,7 @@ function readParams() {
   const sp = getSearchParams()
   return {
     sessions: sp.get('sessions') || undefined,
-    statuses: sp.get('statuses') || undefined,
+    status: sp.get('status') || undefined,
     q: sp.get('q') || undefined,
     sort: sp.get('sort') || undefined,
     order: sp.get('order') || undefined,
@@ -41,10 +41,10 @@ export function useAttendance(eventId: string | null): UseAttendanceResult {
     try {
       setLoading(true)
       setError(null)
-      const { sessions, statuses, q, sort, order, page, pageSize } = readParams()
+      const { sessions, status, q, sort, order, page, pageSize } = readParams()
       const url = new URL(`/api/admin/events/${eventId}/attendance`, window.location.origin)
       if (sessions) url.searchParams.set('sessions', sessions)
-      if (statuses) url.searchParams.set('statuses', statuses)
+      if (status) url.searchParams.set('status', status)
       if (q) url.searchParams.set('q', q)
       if (sort) url.searchParams.set('sort', sort)
       if (order) url.searchParams.set('order', order)
@@ -80,10 +80,10 @@ export function useAttendance(eventId: string | null): UseAttendanceResult {
       switch (r.status) {
         case 'present':
           entry.present += 1; break
-        case 'checked-in':
+        case 'checked-in-only':
           entry.checkedInOnly += 1; break
-        case 'checked-out':
-          entry.checkedOut += 1; break
+        case 'absent':
+          entry.absent += 1; break
         default:
           entry.absent += 1; break
       }
