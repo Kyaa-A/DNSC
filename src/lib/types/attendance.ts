@@ -1,4 +1,4 @@
-export type AttendanceDerivedStatus = 'present' | 'checked-in' | 'checked-out' | 'absent' | 'late'
+export type AttendanceDerivedStatus = 'present' | 'checked-in-only' | 'absent'
 
 export interface AttendanceKpisDto {
   registered: number
@@ -38,7 +38,7 @@ export interface AttendanceListResponseDto {
 
 export interface AttendanceQueryParamsDto {
   sessionIds?: string[]
-  statuses?: AttendanceDerivedStatus[]
+  status?: AttendanceDerivedStatus
   q?: string
   sort?: 'name' | 'status' | 'checkInAt'
   order?: 'asc' | 'desc'

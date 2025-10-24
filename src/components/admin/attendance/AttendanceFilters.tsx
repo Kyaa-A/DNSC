@@ -9,6 +9,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Search, Filter, Download, RotateCcw } from 'lucide-react';
+import type { AttendanceDerivedStatus } from '@/lib/types/attendance';
 
 interface SessionOption {
   id: string;
@@ -19,15 +20,13 @@ interface AttendanceFiltersProps {
   sessions: SessionOption[];
   selectedSessionIds?: string[];
   onSelectionChange?: (sessionIds: string[]) => void;
-  selectedStatus?: AttendanceStatus | null;
-  onStatusChange?: (status: AttendanceStatus | null) => void;
+  selectedStatus?: AttendanceDerivedStatus | null;
+  onStatusChange?: (status: AttendanceDerivedStatus | null) => void;
   query?: string;
   onQueryChange?: (q: string) => void;
   eventId?: string;
   className?: string;
 }
-
-type AttendanceStatus = 'present' | 'absent' | 'checked-in-only';
 
 const parseFromUrl = (): string[] => {
   if (typeof window === 'undefined') return [];
@@ -37,12 +36,12 @@ const parseFromUrl = (): string[] => {
   return raw.split(',').filter(Boolean);
 };
 
-const parseStatusFromUrl = (): AttendanceStatus | null => {
+const parseStatusFromUrl = (): AttendanceDerivedStatus | null => {
   if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
   const raw = params.get('status');
   if (!raw) return null;
-  return ['present', 'absent', 'checked-in-only'].includes(raw) ? raw as AttendanceStatus : null;
+  return ['present', 'absent', 'checked-in-only'].includes(raw) ? raw as AttendanceDerivedStatus : null;
 };
 
 const writeSessionsToUrl = (ids: string[]) => {
@@ -55,7 +54,7 @@ const writeSessionsToUrl = (ids: string[]) => {
   window.history.pushState({}, '', url.toString());
 };
 
-const writeStatusToUrl = (status: AttendanceStatus | null) => {
+const writeStatusToUrl = (status: AttendanceDerivedStatus | null) => {
   const url = new URL(window.location.href);
   if (status) {
     url.searchParams.set('status', status);
@@ -85,7 +84,7 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
   const initial = useMemo(() => (selectedSessionIds && selectedSessionIds.length > 0 ? selectedSessionIds : parseFromUrl()), [selectedSessionIds]);
   const [selected, setSelected] = useState<string[]>(initial);
   const initialStatus = useMemo(() => (selectedStatus ? selectedStatus : parseStatusFromUrl()), [selectedStatus]);
-  const [status, setStatus] = useState<AttendanceStatus | null>(initialStatus);
+  const [status, setStatus] = useState<AttendanceDerivedStatus | null>(initialStatus);
   const initialQuery = useMemo(() => (typeof query === 'string' ? query : parseQueryFromUrl()), [query]);
   const [localQuery, setLocalQuery] = useState<string>(initialQuery);
   const [debouncedQuery, setDebouncedQuery] = useState<string>(initialQuery);
@@ -333,7 +332,7 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
-              <Select value={status || ''} onValueChange={(value) => setStatus(value as AttendanceStatus || null)}>
+              <Select value={status || ''} onValueChange={(value) => setStatus(value as AttendanceDerivedStatus || null)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select attendance status..." />
                 </SelectTrigger>

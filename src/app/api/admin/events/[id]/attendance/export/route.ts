@@ -3,6 +3,25 @@ import { prisma } from '@/lib/db/client'
 
 export const dynamic = 'force-dynamic'
 
+// Type for XLSX worksheet styling
+type WorksheetWithStyle = Record<string, unknown>
+
+// Type for XLSX cell with styling
+interface XLSXCell {
+  v?: unknown
+  s?: {
+    font?: { bold?: boolean; color?: { rgb: string } }
+    fill?: { fgColor?: { rgb: string } }
+    alignment?: { horizontal?: string; vertical?: string }
+    border?: {
+      top?: { style?: string; color?: { rgb: string } }
+      bottom?: { style?: string; color?: { rgb: string } }
+      left?: { style?: string; color?: { rgb: string } }
+      right?: { style?: string; color?: { rgb: string } }
+    }
+  }
+}
+
 type SortKey = 'name' | 'status' | 'checkInAt'
 
 function parseStringList(param: string | null | undefined): string[] {
@@ -26,6 +45,21 @@ function deriveStatus(timeIn: Date | null, timeOut: Date | null): string {
   return 'absent'
 }
 
+function formatToPhilippineTime(date: Date | null): string {
+  if (!date) return ''
+  
+  // Format directly using Asia/Manila timezone
+  return date.toLocaleString('en-US', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const params = await ctx.params
@@ -33,6 +67,23 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (!eventId) {
       return new Response(JSON.stringify({ error: 'Missing event id' }), { status: 400 })
     }
+
+    // Fetch event name for filename
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { name: true }
+    })
+    
+    if (!event) {
+      return new Response(JSON.stringify({ error: 'Event not found' }), { status: 404 })
+    }
+
+    // Sanitize event name for filename
+    const sanitizedEventName = event.name
+      .replace(/[^a-zA-Z0-9\s-_]/g, '') // Remove special characters except spaces, hyphens, underscores
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .toLowerCase()
+      .substring(0, 50) // Limit length for filename
 
     const { searchParams } = new URL(req.url)
     const sessionIds = parseStringList(searchParams.get('sessions'))
@@ -89,6 +140,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
           // Sort by derived status (approximate by timeIn/timeOut presence)
           return [{ timeIn: order }, { timeOut: order }]
         case 'checkInAt':
+          // Sort by check-in time chronologically (ascending = earliest first, descending = latest first)
           return [{ timeIn: order }]
         default:
           return [{ createdAt: order }]
@@ -100,7 +152,16 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       const XLSX = await import('xlsx')
       const batchSize = 500
       let cursor: string | null = null
+      
+      // Determine if we should create separate sheets per session
+      const shouldCreateMultipleSheets = sessionIds.length === 0 || sessionIds.length > 1
+      
+      // If creating multiple sheets, organize data by session
+      const sessionDataMap = new Map<string, Array<Record<string, string | number>>>()
+      
+      // If single session, use simple array
       const rows: Array<Record<string, string | number>> = []
+      
       while (true) {
         const records: Array<{
           id: string
@@ -123,6 +184,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
           ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
         })
         if (records.length === 0) break
+        
         for (const r of records) {
           const name = [r.student?.firstName, r.student?.lastName].filter(Boolean).join(' ').trim() || ''
           const status = deriveStatus(r.timeIn, r.timeOut)
@@ -130,34 +192,164 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
           const email = r.student?.email || ''
           const studentId = r.student?.studentIdNumber || ''
           const programSection = [r.student?.program?.name].filter(Boolean).join('/')
-          const sessionName = r.session?.name || ''
+          const sessionName = r.session?.name || 'Unknown Session'
+          
           if (q) {
             const hay = `${name} ${email} ${studentId}`.toLowerCase()
             if (!hay.includes(q.toLowerCase())) continue
           }
-          rows.push({
+          
+          const rowData = {
             Name: name,
             Email: email,
             'Student/ID': studentId,
             'Program/Section': programSection,
             Year: r.student?.year || '',
             Status: status,
-            'Check-in': r.timeIn ? r.timeIn.toISOString() : '',
-            'Check-out': r.timeOut ? r.timeOut.toISOString() : '',
-            Session: sessionName,
-          })
+            'Check-in': formatToPhilippineTime(r.timeIn),
+            'Check-out': formatToPhilippineTime(r.timeOut),
+            // Only include Session column if not creating multiple sheets
+            ...(shouldCreateMultipleSheets ? {} : { Session: sessionName }),
+          }
+          
+          if (shouldCreateMultipleSheets) {
+            // Group by session
+            if (!sessionDataMap.has(sessionName)) {
+              sessionDataMap.set(sessionName, [])
+            }
+            sessionDataMap.get(sessionName)!.push(rowData)
+          } else {
+            // Single sheet
+            rows.push(rowData)
+          }
         }
         cursor = records[records.length - 1]?.id || null
         if (!cursor || records.length < batchSize) break
       }
 
       const wb = XLSX.utils.book_new()
-      const ws = XLSX.utils.json_to_sheet(rows)
-      XLSX.utils.book_append_sheet(wb, ws, 'Attendance')
+      
+      // Helper function to style worksheet
+      const styleWorksheet = (ws: WorksheetWithStyle, data: Record<string, string | number>[]) => {
+        // Define column widths
+        const colWidths = [
+          { wch: 25 }, // Name
+          { wch: 30 }, // Email
+          { wch: 15 }, // Student/ID
+          { wch: 20 }, // Program/Section
+          { wch: 8 },  // Year
+          { wch: 12 }, // Status
+          { wch: 20 }, // Check-in
+          { wch: 20 }, // Check-out
+          { wch: 20 }, // Session (if present)
+        ]
+        
+        // Set column widths
+        ws['!cols'] = colWidths
+        
+        // Style header row
+        const headerRow = 1
+        const headers = Object.keys(data[0] || {})
+        
+        headers.forEach((header, colIndex) => {
+          const cellAddress = XLSX.utils.encode_cell({ r: headerRow - 1, c: colIndex })
+          if (!ws[cellAddress]) ws[cellAddress] = { v: header } as XLSXCell
+          
+          // Apply header styling
+          (ws[cellAddress] as XLSXCell).s = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "2E86AB" } }, // Blue background
+            alignment: { horizontal: "center", vertical: "center" },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } }
+            }
+          }
+        })
+        
+        // Style data rows
+        data.forEach((row, rowIndex) => {
+          headers.forEach((header, colIndex) => {
+            const cellAddress = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex })
+            if (!ws[cellAddress]) ws[cellAddress] = { v: row[header] } as XLSXCell
+            
+            // Alternate row colors
+            const isEvenRow = (rowIndex + 1) % 2 === 0
+            const backgroundColor = isEvenRow ? "F8F9FA" : "FFFFFF"
+            
+            // Status-specific coloring
+            let statusColor = "000000"
+            if (header === "Status") {
+              switch (row[header]) {
+                case "present":
+                  statusColor = "28A745" // Green
+                  break
+                case "checked-in":
+                  statusColor = "FFC107" // Yellow
+                  break
+                case "checked-out":
+                  statusColor = "DC3545" // Red
+                  break
+                case "absent":
+                  statusColor = "6C757D" // Gray
+                  break
+              }
+            }
+            
+            (ws[cellAddress] as XLSXCell).s = {
+              font: { color: { rgb: statusColor } },
+              fill: { fgColor: { rgb: backgroundColor } },
+              alignment: { 
+                horizontal: header === "Year" ? "center" : "left",
+                vertical: "center"
+              },
+              border: {
+                top: { style: "thin", color: { rgb: "E9ECEF" } },
+                bottom: { style: "thin", color: { rgb: "E9ECEF" } },
+                left: { style: "thin", color: { rgb: "E9ECEF" } },
+                right: { style: "thin", color: { rgb: "E9ECEF" } }
+              }
+            }
+          })
+        })
+        
+        // Add auto-filter
+        ws['!autofilter'] = { ref: `A1:${XLSX.utils.encode_cell({ r: data.length, c: headers.length - 1 })}` }
+        
+        // Freeze header row
+        ws['!freeze'] = { xSplit: 0, ySplit: 1 }
+      }
+      
+      if (shouldCreateMultipleSheets && sessionDataMap.size > 1) {
+        // Create separate sheets for each session
+        for (const [sessionName, sessionRows] of sessionDataMap) {
+          if (sessionRows.length > 0) {
+            // Sanitize sheet name (Excel has restrictions on sheet names)
+            const sanitizedSheetName = sessionName
+              .replace(/[\\\/\?\*\[\]]/g, '_') // Replace invalid characters
+              .substring(0, 31) // Excel sheet name limit is 31 characters
+            
+            const ws = XLSX.utils.json_to_sheet(sessionRows)
+            styleWorksheet(ws as WorksheetWithStyle, sessionRows)
+            XLSX.utils.book_append_sheet(wb, ws, sanitizedSheetName)
+          }
+        }
+      } else {
+        // Single sheet (either single session or all sessions combined)
+        const dataToUse = shouldCreateMultipleSheets && sessionDataMap.size === 1 
+          ? Array.from(sessionDataMap.values())[0] 
+          : rows
+        const ws = XLSX.utils.json_to_sheet(dataToUse)
+        styleWorksheet(ws as WorksheetWithStyle, dataToUse)
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance')
+      }
+      
       const xlsxBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer
       const headers = new Headers({
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="attendance-${eventId}.xlsx"`,
+        'Content-Disposition': `attachment; filename="attendance-${sanitizedEventName}.xlsx"`,
         'Cache-Control': 'no-store',
       })
       return new Response(new Uint8Array(xlsxBuffer), { status: 200, headers })
@@ -178,7 +370,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
         'Name',
         'Email',
         'Student/ID',
-        'Program/Section',
+        'Program',
         'Year',
         'Status',
         'Check-in',
@@ -241,8 +433,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
             programSection,
             r.student?.year || '',
             status,
-            r.timeIn ? r.timeIn.toISOString() : '',
-            r.timeOut ? r.timeOut.toISOString() : '',
+            formatToPhilippineTime(r.timeIn),
+            formatToPhilippineTime(r.timeOut),
             sessionName,
           ].map(csvEscape).join(',') + '\n'
         )
@@ -256,7 +448,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
     const headers = new Headers({
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="attendance-${eventId}.csv"`,
+      'Content-Disposition': `attachment; filename="attendance-${sanitizedEventName}.csv"`,
       'Cache-Control': 'no-store',
     })
 
