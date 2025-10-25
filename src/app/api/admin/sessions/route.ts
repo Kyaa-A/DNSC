@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/client';
 import { authenticateApiRequest, ApiAuthResult } from '@/lib/auth/api-auth';
 import { logActivity } from '@/lib/db/queries/activity';
-import { createSessionSchema, sessionQuerySchema } from '@/lib/validations/session';
+import { createSessionSchema, sessionConflictCheckSchema, sessionQuerySchema } from '@/lib/validations/session';
 import { Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
@@ -128,6 +128,10 @@ export async function POST(request: NextRequest) {
   let body: Record<string, unknown> | undefined;
 
   try {
+    // Check if this is a conflict check request
+    const { searchParams } = new URL(request.url);
+    const isConflictCheck = searchParams.get('checkConflicts') === 'true';
+
     // Authenticate admin request
     authResult = await authenticateApiRequest(request, {
       requiredRole: 'admin',
@@ -173,8 +177,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
-    // Validate request body
-    const validationResult = createSessionSchema.safeParse(body!);
+    // Use appropriate validation schema based on request type
+    const validationResult = isConflictCheck 
+      ? sessionConflictCheckSchema.safeParse(body!)
+      : createSessionSchema.safeParse(body!);
+      
     if (!validationResult.success) {
       return NextResponse.json(
         {
@@ -193,11 +200,82 @@ export async function POST(request: NextRequest) {
       timeInEnd, 
       timeOutStart, 
       timeOutEnd, 
+      hasTimeout,
       organizerIds,
       maxCapacity,
       allowWalkIns,
       requireRegistration
     } = validationResult.data;
+
+    // For conflict checking, we only need to verify the event exists and check for conflicts
+    if (isConflictCheck) {
+      // Verify event exists and is active
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+      });
+
+      if (!event) {
+        return NextResponse.json(
+          { error: 'Event not found' },
+          { status: 404 }
+        );
+      }
+
+      if (!event.isActive) {
+        return NextResponse.json(
+          { error: 'Cannot create session for inactive event' },
+          { status: 400 }
+        );
+      }
+
+      // Check for time window conflicts with existing sessions
+      const whereClause: Prisma.SessionWhereInput = {
+        eventId,
+        isActive: true,
+        OR: [
+          // Time-in window conflicts
+          {
+            AND: [
+              { timeInStart: { lte: new Date(timeInEnd) } },
+              { timeInEnd: { gte: new Date(timeInStart) } },
+            ],
+          },
+        ],
+      };
+
+      // Add time-out window conflicts if both sessions have time-out windows
+      if (hasTimeout && timeOutStart && timeOutEnd) {
+        whereClause.OR = whereClause.OR || [];
+        whereClause.OR.push({
+          AND: [
+            { timeOutStart: { not: null } },
+            { timeOutEnd: { not: null } },
+            { timeOutStart: { lte: new Date(timeOutEnd) } },
+            { timeOutEnd: { gte: new Date(timeOutStart) } },
+          ],
+        } as Prisma.SessionWhereInput);
+      }
+
+      const conflictingSessions = await prisma.session.findMany({
+        where: whereClause,
+      });
+
+      if (conflictingSessions.length > 0) {
+        return NextResponse.json(
+          { 
+            error: 'Session time windows conflict with existing sessions',
+            conflictingSessions: conflictingSessions.map(s => s.name),
+          },
+          { status: 409 }
+        );
+      }
+
+      // No conflicts found
+      return NextResponse.json(
+        { success: true, message: 'No conflicts found' },
+        { status: 200 }
+      );
+    }
 
     // TODO: Implement session-organizer relationship and additional fields in database schema
     // For now, we'll log the additional fields but not store them in the database
@@ -288,7 +366,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Add time-out window conflicts if both sessions have time-out windows
-    if (timeOutStart && timeOutEnd) {
+    if (hasTimeout && timeOutStart && timeOutEnd) {
       whereClause.OR = whereClause.OR || [];
       whereClause.OR.push({
         AND: [
@@ -340,10 +418,9 @@ export async function POST(request: NextRequest) {
       timeInEnd: new Date(timeInEnd),
     };
 
-    if (timeOutStart) {
+    // Only add timeout fields if hasTimeout is true and values are provided
+    if (hasTimeout && timeOutStart && timeOutEnd) {
       sessionData.timeOutStart = new Date(timeOutStart);
-    }
-    if (timeOutEnd) {
       sessionData.timeOutEnd = new Date(timeOutEnd);
     }
 
@@ -384,8 +461,9 @@ export async function POST(request: NextRequest) {
         eventName: event.name,
         timeInStart: new Date(timeInStart).toISOString(),
         timeInEnd: new Date(timeInEnd).toISOString(),
-        timeOutStart: timeOutStart ? new Date(timeOutStart).toISOString() : null,
-        timeOutEnd: timeOutEnd ? new Date(timeOutEnd).toISOString() : null,
+        timeOutStart: hasTimeout && timeOutStart ? new Date(timeOutStart).toISOString() : null,
+        timeOutEnd: hasTimeout && timeOutEnd ? new Date(timeOutEnd).toISOString() : null,
+        hasTimeout: hasTimeout || false,
         creationDuration: Date.now() - startTime,
         ipAddress,
         userAgent,

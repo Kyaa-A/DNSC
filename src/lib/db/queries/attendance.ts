@@ -775,19 +775,75 @@ export async function getEventAttendanceListWithFilters(
 export async function getEventAttendanceKpis(
   eventId: string
 ): Promise<{ registered: number; present: number; checkedInOnly: number; checkedOut: number; absent: number; attendanceRatePercent: number }> {
-  const registered = await prisma.attendance.groupBy({ by: ['studentId'], where: { eventId }, _count: { studentId: true } }).then((g) => g.length)
-  // For present/checked-in/out we approximate on attendance rows; refine with domain rules if needed
-  const recent = await prisma.attendance.findMany({ where: { eventId }, select: { timeIn: true, timeOut: true } })
-  let present = 0,
-    checkedInOnly = 0,
-    checkedOut = 0
-  for (const r of recent) {
-    const s = deriveAttendanceStatus({ timeIn: r.timeIn, timeOut: r.timeOut })
-    if (s === 'present') present++
-    else if (s === 'checked-in') checkedInOnly++
-    else if (s === 'checked-out') checkedOut++
+  try {
+    // Get all students who have attendance records for this event
+    const attendanceRecords = await prisma.attendance.findMany({
+      where: { eventId },
+      select: {
+        studentId: true,
+        timeIn: true,
+        timeOut: true,
+      },
+    });
+
+    // Group by studentId to get unique students and their attendance status
+    const studentAttendanceMap = new Map<string, { timeIn: Date | null; timeOut: Date | null }>();
+    
+    for (const record of attendanceRecords) {
+      const existing = studentAttendanceMap.get(record.studentId);
+      if (existing) {
+        // If student has multiple records, keep the earliest timeIn and latest timeOut
+        if (record.timeIn && (!existing.timeIn || record.timeIn < existing.timeIn)) {
+          existing.timeIn = record.timeIn;
+        }
+        if (record.timeOut && (!existing.timeOut || record.timeOut > existing.timeOut)) {
+          existing.timeOut = record.timeOut;
+        }
+      } else {
+        studentAttendanceMap.set(record.studentId, {
+          timeIn: record.timeIn,
+          timeOut: record.timeOut,
+        });
+      }
+    }
+
+    // Calculate counts based on unique students
+    const registered = studentAttendanceMap.size; // Students who have any attendance record
+    let present = 0;
+    let checkedInOnly = 0;
+    let checkedOut = 0;
+
+    for (const [, attendance] of studentAttendanceMap) {
+      const status = deriveAttendanceStatus({ 
+        timeIn: attendance.timeIn, 
+        timeOut: attendance.timeOut 
+      });
+      
+      if (status === 'present') present++;
+      else if (status === 'checked-in') checkedInOnly++;
+      else if (status === 'checked-out') checkedOut++;
+    }
+
+    const absent = Math.max(registered - (present + checkedInOnly + checkedOut), 0);
+    const attendanceRatePercent = registered > 0 ? Math.round((present / registered) * 100) : 0;
+
+    return { 
+      registered, 
+      present, 
+      checkedInOnly, 
+      checkedOut, 
+      absent, 
+      attendanceRatePercent 
+    };
+  } catch (error) {
+    console.error('Error getting event attendance KPIs:', error);
+    return {
+      registered: 0,
+      present: 0,
+      checkedInOnly: 0,
+      checkedOut: 0,
+      absent: 0,
+      attendanceRatePercent: 0,
+    };
   }
-  const absent = Math.max(registered - present, 0)
-  const attendanceRatePercent = registered > 0 ? Math.round((present / registered) * 100) : 0
-  return { registered, present, checkedInOnly, checkedOut, absent, attendanceRatePercent }
 }

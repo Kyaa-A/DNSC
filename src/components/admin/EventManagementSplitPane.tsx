@@ -97,29 +97,23 @@ function SessionDetailsView({
               {formatDateTime(session.timeInStart)} - {formatDateTime(session.timeInEnd)}
             </p>
           </div>
-          {session.timeOutStart != null && session.timeOutEnd != null && (
+          {session.timeOutStart != null && session.timeOutEnd != null ? (
             <div className="p-3 border dark:border-gray-700 rounded-lg">
               <p className="text-sm font-medium mb-1">Time Out Window</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {formatDateTime(session.timeOutStart)} - {formatDateTime(session.timeOutEnd)}
               </p>
             </div>
+          ) : (
+            <div className="p-3 border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <p className="text-sm font-medium mb-1 text-gray-500 dark:text-gray-400">Time Out Window</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">No timeout window configured</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Attendance Stats */}
-      {'_count' in session && session._count ? (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Attendance Statistics</h3>
-          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-2xl font-bold">
-              {(session._count as { attendance?: number }).attendance || 0}
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total Attendance Records</p>
-          </div>
-        </div>
-      ) : null}
+      {/* Attendance Stats - Temporarily removed for accuracy */}
 
       {/* Actions */}
       <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
@@ -555,7 +549,13 @@ export function EventManagementSplitPane() {
         await fetchEvents(); // Refresh to get updated session data
       } else {
         console.error('Session creation failed:', data);
-        throw new Error(data.error || 'Failed to create session');
+        
+        // Handle conflict errors specifically
+        if (response.status === 409 && data.conflictingSessions) {
+          sessionFeedback.create.conflict(sessionName, data.conflictingSessions, String(toastId));
+        } else {
+          throw new Error(data.error || 'Failed to create session');
+        }
       }
     } catch (err: unknown) {
       sessionFeedback.create.error(sessionName, err instanceof Error ? err.message : 'Failed to create session', String(toastId));
@@ -752,7 +752,7 @@ export function EventManagementSplitPane() {
 
       {/* Create Session Dialog */}
       <Dialog open={isCreateSessionOpen} onOpenChange={setIsCreateSessionOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Session</DialogTitle>
             <DialogDescription>
@@ -764,6 +764,7 @@ export function EventManagementSplitPane() {
               eventId={selectedEvent.id}
               onSubmit={handleCreateSessionSubmit}
               onCancel={() => setIsCreateSessionOpen(false)}
+              onSuccess={() => setIsCreateSessionOpen(false)}
               isSubmitting={isCreatingSession}
             />
           )}
@@ -811,11 +812,16 @@ export function EventManagementSplitPane() {
                   description: session.description || undefined,
                   timeInStart: new Date(session.timeInStart),
                   timeInEnd: new Date(session.timeInEnd),
-                  timeOutStart: session.timeOutStart ? new Date(session.timeOutStart) : new Date(Date.now() + 60 * 60 * 1000),
-                  timeOutEnd: session.timeOutEnd ? new Date(session.timeOutEnd) : new Date(Date.now() + 90 * 60 * 1000),
+                  timeOutStart: session.timeOutStart ? new Date(session.timeOutStart) : undefined,
+                  timeOutEnd: session.timeOutEnd ? new Date(session.timeOutEnd) : undefined,
+                  hasTimeout: session.timeOutStart && session.timeOutEnd ? true : false,
                 }}
                 onSubmit={handleEditSessionSubmit}
                 onCancel={() => {
+                  setIsEditSessionOpen(false);
+                  setSelectedSessionId(null);
+                }}
+                onSuccess={() => {
                   setIsEditSessionOpen(false);
                   setSelectedSessionId(null);
                 }}
@@ -986,16 +992,7 @@ export function EventManagementSplitPane() {
                 )}
               </div>
 
-              {/* Attendance Stats */}
-              {viewDetailsEvent._count?.attendance !== undefined && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">Attendance Statistics</h3>
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-2xl font-bold">{viewDetailsEvent._count.attendance}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Attendance Records</p>
-                  </div>
-                </div>
-              )}
+              {/* Attendance Stats - Temporarily removed for accuracy */}
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">

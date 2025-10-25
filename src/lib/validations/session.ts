@@ -55,6 +55,7 @@ export const sessionTimeWindowSchema = z.object({
     .string()
     .datetime('Invalid time-out end format')
     .optional(),
+  hasTimeout: z.boolean().optional().default(false),
 }).refine(
   (data) => {
     const timeInStart = new Date(data.timeInStart);
@@ -87,7 +88,8 @@ export const sessionTimeWindowSchema = z.object({
   }
 ).refine(
   (data) => {
-    if (data.timeOutStart && data.timeOutEnd) {
+    // Only validate timeout window if hasTimeout is true and timeout fields are provided
+    if (data.hasTimeout && data.timeOutStart && data.timeOutEnd) {
       const timeOutStart = new Date(data.timeOutStart);
       const timeOutEnd = new Date(data.timeOutEnd);
       const duration = timeOutEnd.getTime() - timeOutStart.getTime();
@@ -110,7 +112,7 @@ export const sessionTimeWindowSchema = z.object({
   }
 ).refine(
   (data) => {
-    if (data.timeOutStart && data.timeOutEnd) {
+    if (data.hasTimeout && data.timeOutStart && data.timeOutEnd) {
       const timeOutStart = new Date(data.timeOutStart);
       const timeOutEnd = new Date(data.timeOutEnd);
       return timeOutEnd > timeOutStart;
@@ -124,7 +126,7 @@ export const sessionTimeWindowSchema = z.object({
 ).refine(
   (data) => {
     const timeInEnd = new Date(data.timeInEnd);
-    if (data.timeOutStart) {
+    if (data.hasTimeout && data.timeOutStart) {
       const timeOutStart = new Date(data.timeOutStart);
       const gap = timeOutStart.getTime() - timeInEnd.getTime();
       const minGap = 5 * 60 * 1000; // 5 minutes minimum gap
@@ -147,7 +149,51 @@ export const sessionTimeWindowSchema = z.object({
     message: 'Session cannot be scheduled more than 2 years in the future',
     path: ['timeInStart'],
   }
+).refine(
+  (data) => {
+    // If hasTimeout is true, both timeout fields must be provided
+    if (data.hasTimeout) {
+      return data.timeOutStart && data.timeOutEnd;
+    }
+    return true;
+  },
+  {
+    message: 'Both time-out start and end are required when timeout is enabled',
+    path: ['timeOutStart'],
+  }
 );
+
+/**
+ * Session conflict checking validation schema (without organizer requirements)
+ */
+export const sessionConflictCheckSchema = sessionBaseSchema
+  .extend({
+    eventId: z.string().cuid('Invalid event ID format'),
+    organizerIds: z
+      .array(z.string().cuid('Invalid organizer ID format'))
+      .optional()
+      .default([]),
+    maxCapacity: z
+      .number()
+      .min(1, 'Maximum capacity must be at least 1')
+      .max(1000, 'Maximum capacity cannot exceed 1000')
+      .optional(),
+    allowWalkIns: z.boolean().default(true),
+    requireRegistration: z.boolean().default(false),
+  })
+  .merge(sessionTimeWindowSchema)
+  .refine(
+    (data) => {
+      if (data.requireRegistration && !data.maxCapacity) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Maximum capacity is required when registration is required',
+      path: ['maxCapacity'],
+    }
+  );
 
 /**
  * Enhanced session creation validation schema with organizer assignment
@@ -197,10 +243,12 @@ export const updateSessionSchema = sessionBaseSchema
     timeOutStart: z
       .string()
       .datetime('Invalid time-out start format')
+      .nullable()
       .optional(),
     timeOutEnd: z
       .string()
       .datetime('Invalid time-out end format')
+      .nullable()
       .optional(),
     isActive: z.boolean().optional(),
   })
@@ -275,6 +323,7 @@ export const sessionTimeWindowQuerySchema = z.object({
 /**
  * TypeScript types inferred from schemas
  */
+export type SessionConflictCheckInput = z.infer<typeof sessionConflictCheckSchema>;
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type UpdateSessionInput = z.infer<typeof updateSessionSchema>;
 export type SessionQueryParams = z.infer<typeof sessionQuerySchema>;

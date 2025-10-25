@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Search, Filter, Download, RotateCcw } from 'lucide-react';
+import { Search, Filter, Download, RotateCcw, Calendar, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { AttendanceDerivedStatus } from '@/lib/types/attendance';
 
 interface SessionOption {
@@ -92,6 +93,19 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
   const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedProgramIds, setSelectedProgramIds] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<number[]>([]);
+  const [appliedFilters, setAppliedFilters] = useState({
+    sessions: initial,
+    status: initialStatus,
+    query: initialQuery
+  });
+
+  // Detect if there are pending changes
+  const hasPendingChanges = useMemo(() => {
+    const sessionsChanged = JSON.stringify(selected.sort()) !== JSON.stringify(appliedFilters.sessions.sort());
+    const statusChanged = status !== appliedFilters.status;
+    const queryChanged = localQuery.trim() !== appliedFilters.query.trim();
+    return sessionsChanged || statusChanged || queryChanged;
+  }, [selected, status, localQuery, appliedFilters]);
 
   // Keep selection in sync with URL changes (back/forward)
   useEffect(() => {
@@ -105,6 +119,12 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
       const q = parseQueryFromUrl();
       setLocalQuery(q);
       onQueryChange?.(q);
+      // Sync applied filters with URL state
+      setAppliedFilters({
+        sessions: ids,
+        status: sts,
+        query: q
+      });
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -139,6 +159,12 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
     writeSessionsToUrl(selected);
     writeStatusToUrl(status);
     writeQueryToUrl(localQuery);
+    // Update applied filters state
+    setAppliedFilters({
+      sessions: [...selected],
+      status: status,
+      query: localQuery.trim()
+    });
     // Notify listeners (useAttendance) by dispatching popstate
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, [selected, status, localQuery]);
@@ -219,6 +245,7 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
     setSelected([]);
     setStatus(null);
     setLocalQuery('');
+    setAppliedFilters({ sessions: [], status: null, query: '' });
   }, []);
 
   return (
@@ -234,9 +261,16 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
               variant="default" 
               size="sm" 
               onClick={applyFilters}
-              className="bg-primary hover:bg-primary/90"
+              disabled={!hasPendingChanges}
+              className={cn(
+                "bg-primary hover:bg-primary/90",
+                hasPendingChanges && "ring-2 ring-yellow-500 ring-offset-2"
+              )}
             >
               Apply Filters
+              {hasPendingChanges && (
+                <span className="ml-2 h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+              )}
             </Button>
             <div className="flex items-center gap-1">
               <Button 
@@ -297,6 +331,7 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
           <AccordionItem value="sessions" className="border rounded-lg">
             <AccordionTrigger className="px-4 py-3 hover:no-underline">
               <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Sessions</span>
                 {selected.length > 0 && (
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
@@ -323,6 +358,7 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
           <AccordionItem value="status" className="border rounded-lg">
             <AccordionTrigger className="px-4 py-3 hover:no-underline">
               <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Status</span>
                 {status && (
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">

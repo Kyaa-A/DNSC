@@ -62,11 +62,35 @@ export function AttendanceKpis({ loading, data, perSessionAggregates, className 
   const present = data?.present ?? 0;
   const checkedInOnly = data?.checkedInOnly ?? 0;
   const checkedOut = data?.checkedOut ?? 0;
-  const absent = data?.absent ?? Math.max(registered - present, 0);
-  const attendanceRatePercent = data?.attendanceRatePercent ?? (registered > 0 ? Math.round((present / registered) * 100) : 0);
+  
+  // Calculate absent as registered minus those who have any attendance record
+  const totalWithAttendance = present + checkedInOnly + checkedOut;
+  const absent = data?.absent ?? Math.max(registered - totalWithAttendance, 0);
+  
+  // Cap attendance rate at 100% to prevent impossible values
+  const rawAttendanceRate = registered > 0 ? (present / registered) * 100 : 0;
+  const attendanceRatePercent = data?.attendanceRatePercent ?? Math.min(Math.round(rawAttendanceRate), 100);
+  
+  // Check for data inconsistencies
+  const hasDataInconsistency = present > registered || totalWithAttendance > registered;
+  const isCappedRate = rawAttendanceRate > 100;
 
   return (
     <div className={className}>
+      {/* Data inconsistency warning */}
+      {hasDataInconsistency && (
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>Data Warning:</strong> Attendance data appears inconsistent. 
+              {present > registered && ` Present count (${present}) exceeds registered count (${registered}).`}
+              {isCappedRate && ` Attendance rate capped at 100%.`}
+            </p>
+          </div>
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -124,7 +148,14 @@ export function AttendanceKpis({ loading, data, perSessionAggregates, className 
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{attendanceRatePercent}%</div>
-            <p className="text-xs text-muted-foreground">Present ÷ Registered</p>
+            <p className="text-xs text-muted-foreground">
+              Present ÷ Registered
+              {isCappedRate && (
+                <span className="ml-1 text-yellow-600 dark:text-yellow-400">
+                  (capped at 100%)
+                </span>
+              )}
+            </p>
           </CardContent>
         </Card>
       </div>

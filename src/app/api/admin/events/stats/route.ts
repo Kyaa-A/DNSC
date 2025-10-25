@@ -21,14 +21,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch event statistics
+    // Fetch simple, accurate event statistics
     const [
       totalEvents,
       activeEvents,
       totalSessions,
       totalOrganizers,
-      eventsWithSessions,
-      eventsWithAttendance,
     ] = await Promise.all([
       // Total events count
       prisma.event.count(),
@@ -45,24 +43,6 @@ export async function GET(request: NextRequest) {
       prisma.organizer.count({
         where: { isActive: true },
       }),
-      
-      // Events that have sessions
-      prisma.event.count({
-        where: {
-          sessions: {
-            some: {},
-          },
-        },
-      }),
-      
-      // Events that have attendance records
-      prisma.event.count({
-        where: {
-          attendance: {
-            some: {},
-          },
-        },
-      }),
     ]);
 
     const stats = {
@@ -71,10 +51,6 @@ export async function GET(request: NextRequest) {
       inactiveEvents: totalEvents - activeEvents,
       totalSessions,
       totalOrganizers,
-      eventsWithSessions,
-      eventsWithAttendance,
-      eventsWithoutSessions: totalEvents - eventsWithSessions,
-      eventsWithoutAttendance: totalEvents - eventsWithAttendance,
     };
 
     return NextResponse.json({

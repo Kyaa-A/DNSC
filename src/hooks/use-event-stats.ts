@@ -6,10 +6,6 @@ export interface EventStats {
   inactiveEvents: number;
   totalSessions: number;
   totalOrganizers: number;
-  eventsWithSessions: number;
-  eventsWithAttendance: number;
-  eventsWithoutSessions: number;
-  eventsWithoutAttendance: number;
 }
 
 export interface UseEventStatsReturn {

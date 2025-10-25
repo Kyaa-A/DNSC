@@ -168,6 +168,22 @@ export const sessionFeedback = {
         description: error,
       });
     },
+    conflict: (sessionName: string, conflictingSessions: string[], toastId?: string) => {
+      return toast.error(`Cannot create session "${sessionName}"`, {
+        ...errorConfig,
+        duration: 8000, // Longer duration for conflicts
+        icon: React.createElement(AlertCircle, { className: "h-4 w-4 text-red-600" }),
+        id: toastId,
+        description: `Time windows conflict with existing sessions: ${conflictingSessions.join(', ')}`,
+        action: {
+          label: 'View Conflicts',
+          onClick: () => {
+            // This could open a modal or navigate to show conflicting sessions
+            console.log('View conflicts clicked', conflictingSessions);
+          },
+        },
+      });
+    },
   },
 
   // Update operations

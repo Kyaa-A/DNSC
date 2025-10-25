@@ -315,8 +315,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...updateData,
         ...(updateData.timeInStart && { timeInStart: new Date(updateData.timeInStart) }),
         ...(updateData.timeInEnd && { timeInEnd: new Date(updateData.timeInEnd) }),
-        ...(updateData.timeOutStart && { timeOutStart: new Date(updateData.timeOutStart) }),
-        ...(updateData.timeOutEnd && { timeOutEnd: new Date(updateData.timeOutEnd) }),
+        // Handle timeout fields - explicitly set to null if provided as null, or convert to Date if provided as string
+        ...(updateData.timeOutStart !== undefined && { 
+          timeOutStart: updateData.timeOutStart === null ? null : new Date(updateData.timeOutStart) 
+        }),
+        ...(updateData.timeOutEnd !== undefined && { 
+          timeOutEnd: updateData.timeOutEnd === null ? null : new Date(updateData.timeOutEnd) 
+        }),
       },
       include: {
         event: {
