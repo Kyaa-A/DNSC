@@ -38,10 +38,10 @@ function csvEscape(value: unknown): string {
   return s
 }
 
-function deriveStatus(timeIn: Date | null, timeOut: Date | null): string {
+function deriveStatus(timeIn: Date | null, timeOut: Date | null): 'present' | 'checked-in-only' | 'absent' {
   if (timeIn && timeOut) return 'present'
-  if (timeIn && !timeOut) return 'checked-in'
-  if (!timeIn && timeOut) return 'checked-out'
+  if (timeIn && !timeOut) return 'checked-in-only'
+  if (!timeIn && timeOut) return 'absent' // checked-out maps to absent for consistency
   return 'absent'
 }
 
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
     const { searchParams } = new URL(req.url)
     const sessionIds = parseStringList(searchParams.get('sessions'))
-    const statuses = parseStringList(searchParams.get('statuses')) as Array<'present' | 'checked-in' | 'checked-out' | 'absent'>
+    const statuses = parseStringList(searchParams.get('status')) as Array<'present' | 'checked-in-only' | 'absent'>
     const q = (searchParams.get('q') || '').trim()
     const sort = (searchParams.get('sort') as SortKey) || 'name'
     const order = (searchParams.get('order') as 'asc' | 'desc') || 'asc'
@@ -111,6 +111,38 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     if (years.length > 0) studentWhere.year = { in: years }
     if (Object.keys(studentWhere).length > 0) {
       where.student = { is: studentWhere }
+    }
+    
+    // Add status filtering at database level
+    if (statuses.length > 0) {
+      const statusConditions: Record<string, unknown>[] = []
+      
+      for (const status of statuses) {
+        switch (status) {
+          case 'present':
+            statusConditions.push({
+              timeIn: { not: null },
+              timeOut: { not: null }
+            })
+            break
+          case 'checked-in-only':
+            statusConditions.push({
+              timeIn: { not: null },
+              timeOut: null
+            })
+            break
+          case 'absent':
+            statusConditions.push({
+              timeIn: null,
+              timeOut: null
+            })
+            break
+        }
+      }
+      
+      if (statusConditions.length > 0) {
+        where.AND = statusConditions
+      }
     }
 
     // Base include to fetch necessary fields
@@ -188,7 +220,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
         for (const r of records) {
           const name = [r.student?.firstName, r.student?.lastName].filter(Boolean).join(' ').trim() || ''
           const status = deriveStatus(r.timeIn, r.timeOut)
-          if (statuses.length > 0 && !statuses.includes(status as 'present' | 'checked-in' | 'checked-out' | 'absent')) continue
+          if (statuses.length > 0 && !statuses.includes(status)) continue
           const email = r.student?.email || ''
           const studentId = r.student?.studentIdNumber || ''
           const programSection = [r.student?.program?.name].filter(Boolean).join('/')
@@ -409,7 +441,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
       for (const r of records) {
         const name = [r.student?.firstName, r.student?.lastName].filter(Boolean).join(' ').trim() || ''
         const status = deriveStatus(r.timeIn, r.timeOut)
-        if (statuses.length > 0 && !statuses.includes(status as 'present' | 'checked-in' | 'checked-out' | 'absent')) {
+        if (statuses.length > 0 && !statuses.includes(status)) {
           continue
         }
         const email = r.student?.email || ''

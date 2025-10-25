@@ -670,7 +670,7 @@ export async function attendanceRecordExists(
 // Event attendance queries with filters (for admin UI/API)
 // =====================
 
-export type DerivedAttendanceStatus = 'present' | 'checked-in' | 'checked-out' | 'absent'
+export type DerivedAttendanceStatus = 'present' | 'checked-in-only' | 'absent'
 import { deriveAttendanceStatus } from '@/lib/utils/attendance-status'
 
 export interface EventAttendanceListOptions {
@@ -718,6 +718,38 @@ export async function getEventAttendanceListWithFilters(
       { student: { email: { contains: q, mode: 'insensitive' } } },
       { student: { studentIdNumber: { contains: q, mode: 'insensitive' } } },
     ]
+  }
+  
+  // Add status filtering at database level
+  if (statuses.length > 0) {
+    const statusConditions: Record<string, unknown>[] = []
+    
+    for (const status of statuses) {
+      switch (status) {
+        case 'present':
+          statusConditions.push({
+            timeIn: { not: null },
+            timeOut: { not: null }
+          })
+          break
+        case 'checked-in-only':
+          statusConditions.push({
+            timeIn: { not: null },
+            timeOut: null
+          })
+          break
+        case 'absent':
+          statusConditions.push({
+            timeIn: null,
+            timeOut: null
+          })
+          break
+      }
+    }
+    
+    if (statusConditions.length > 0) {
+      where.AND = statusConditions
+    }
   }
 
   const include = {
@@ -767,7 +799,6 @@ export async function getEventAttendanceListWithFilters(
         sessionName: r.session?.name ?? null,
       }
     })
-    .filter((r) => (statuses.length > 0 ? statuses.includes(r.status) : true))
 
   return { rows, total, page, pageSize }
 }
@@ -811,7 +842,6 @@ export async function getEventAttendanceKpis(
     const registered = studentAttendanceMap.size; // Students who have any attendance record
     let present = 0;
     let checkedInOnly = 0;
-    let checkedOut = 0;
 
     for (const [, attendance] of studentAttendanceMap) {
       const status = deriveAttendanceStatus({ 
@@ -820,18 +850,17 @@ export async function getEventAttendanceKpis(
       });
       
       if (status === 'present') present++;
-      else if (status === 'checked-in') checkedInOnly++;
-      else if (status === 'checked-out') checkedOut++;
+      else if (status === 'checked-in-only') checkedInOnly++;
     }
 
-    const absent = Math.max(registered - (present + checkedInOnly + checkedOut), 0);
+    const absent = Math.max(registered - (present + checkedInOnly), 0);
     const attendanceRatePercent = registered > 0 ? Math.round((present / registered) * 100) : 0;
 
     return { 
       registered, 
       present, 
       checkedInOnly, 
-      checkedOut, 
+      checkedOut: 0, // Deprecated field, always 0
       absent, 
       attendanceRatePercent 
     };

@@ -1,4 +1,4 @@
-export type AttendanceDerivedStatus = 'present' | 'checked-in' | 'checked-out' | 'absent' | 'late'
+export type AttendanceDerivedStatus = 'present' | 'checked-in-only' | 'absent' | 'late'
 
 export interface StatusInputs {
   timeIn?: string | Date | null
@@ -30,10 +30,8 @@ export function deriveAttendanceStatus(inputs: StatusInputs): AttendanceDerivedS
   }
   if (timeIn && !timeOut) {
     if (winEnd && timeIn > winEnd) return 'late'
-    return 'checked-in'
+    return 'checked-in-only'
   }
-  if (!timeIn && timeOut) return 'checked-out'
+  if (!timeIn && timeOut) return 'absent' // checked-out maps to absent for consistency
   return 'absent'
 }
-
-

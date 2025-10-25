@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
 
     const { searchParams } = new URL(req.url)
     const sessionIds = parseStringList(searchParams.get('sessions'))
-    const statuses = parseStringList(searchParams.get('statuses')) as Array<'present' | 'checked-in' | 'checked-out' | 'absent'>
+    const statuses = parseStringList(searchParams.get('status')) as Array<'present' | 'checked-in-only' | 'absent'>
     const q = (searchParams.get('q') || '').trim()
     const sort = (searchParams.get('sort') as SortKey) || 'name'
     const order = (searchParams.get('order') as 'asc' | 'desc') || 'asc'
