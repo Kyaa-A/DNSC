@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
+// Auth.js v5 uses "authjs.session-token" cookie (not "next-auth.session-token")
+const isSecure = process.env.NEXTAUTH_URL?.startsWith('https') ||
+  process.env.VERCEL_URL !== undefined
+
+const cookieName = isSecure
+  ? '__Secure-authjs.session-token'
+  : 'authjs.session-token'
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const token = await getToken({ req: request })
-  const isLoggedIn = !!token
 
   // Public routes — always allow
   if (pathname.startsWith('/auth/')) return NextResponse.next()
@@ -17,6 +23,13 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.next()
   }
+
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    cookieName,
+  })
+  const isLoggedIn = !!token
 
   // Protected routes — redirect to login if not authenticated
   if (!isLoggedIn) {
@@ -46,15 +59,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (authentication routes)
-     * - api/public (public API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public directory assets
-     */
     '/((?!api/auth|api/public|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };
