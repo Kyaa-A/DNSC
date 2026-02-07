@@ -1,8 +1,5 @@
 export { auth as middleware } from '@/lib/auth/auth'
 
-// Use Node.js runtime for middleware (Prisma + bcryptjs require Node.js APIs)
-export const runtime = 'nodejs'
-
 export const config = {
   matcher: [
     /*
