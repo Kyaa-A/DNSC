@@ -11,14 +11,10 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 // Create Prisma client with enhanced configuration
+// Note: datasources.db.url is read from schema.prisma env("DATABASE_URL") automatically
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   errorFormat: 'pretty',
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
 })
 
 // In development, store the client globally to prevent multiple instances
