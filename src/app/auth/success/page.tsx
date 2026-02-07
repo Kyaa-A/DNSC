@@ -31,13 +31,10 @@ export default function AuthSuccessPage() {
       
       // Redirect after a short delay to show the success message
       const timer = setTimeout(() => {
-        router.push(redirectPath);
+        router.replace(redirectPath);
       }, 1500);
-      
+
       return () => clearTimeout(timer);
-    } else if (!loading && !user) {
-      // If no user after loading, redirect to login
-      router.push('/auth/login');
     }
   }, [user, loading, router]);
 

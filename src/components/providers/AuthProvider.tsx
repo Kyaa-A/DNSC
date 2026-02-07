@@ -44,12 +44,15 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         return { error: 'Invalid email or password. Please check your credentials and try again.' }
       }
 
+      // Refresh the session so useSession() picks up the new JWT cookie
+      await update()
+
       return { error: null }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       return { error: errorMessage }
     }
-  }, [])
+  }, [update])
 
   const signOut = useCallback(async (): Promise<void> => {
     await nextAuthSignOut({ redirect: true, redirectTo: '/auth/login' })
