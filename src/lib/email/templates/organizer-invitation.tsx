@@ -9,13 +9,13 @@ interface OrganizerInvitationTemplateProps {
 
 export function OrganizerInvitationTemplate({ organizerName, inviteLink, eventName }: OrganizerInvitationTemplateProps) {
   return (
-    <BaseEmailTemplate title="You're invited to organize with DTP Attendance">
+    <BaseEmailTemplate title="You're invited to organize with DNSC Attendance">
       <p style={{ 
         margin: '0 0 24px 0',
         fontSize: 15,
         lineHeight: 1.5
       }}>
-        Hi <span style={{ color: '#EAB308', fontWeight: 600 }}>{organizerName}</span>,
+        Hi <span style={{ color: '#22964d', fontWeight: 600 }}>{organizerName}</span>,
       </p>
 
       <div style={{ marginBottom: '32px' }}>
@@ -26,9 +26,9 @@ export function OrganizerInvitationTemplate({ organizerName, inviteLink, eventNa
           lineHeight: 1.6
         }}>
           {eventName ? (
-            <>You have been invited to organize <strong style={{ color: '#000000' }}>{eventName}</strong> on the DTP Attendance system.</>
+            <>You have been invited to organize <strong style={{ color: '#000000' }}>{eventName}</strong> on the DNSC Attendance system.</>
           ) : (
-            <>You have been invited to join the DTP Attendance system as an organizer.</>
+            <>You have been invited to join the DNSC Attendance system as an organizer.</>
           )}
         </p>
         <p style={{ 
@@ -46,7 +46,7 @@ export function OrganizerInvitationTemplate({ organizerName, inviteLink, eventNa
           href={inviteLink}
           style={{
             display: 'inline-block',
-            backgroundColor: '#EAB308',
+            backgroundColor: '#22964d',
             color: '#ffffff',
             padding: '12px 32px',
             borderRadius: '6px',

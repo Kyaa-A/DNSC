@@ -35,8 +35,8 @@ const getActivityIcon = (type: string, severity?: string) => {
   const iconClass = cn(
     'w-4 h-4 flex-shrink-0',
     severity === 'high' ? 'text-red-500' :
-    severity === 'medium' ? 'text-yellow-500' :
-    'text-yellow-500'
+    severity === 'medium' ? 'text-primary-500' :
+    'text-primary-500'
   );
 
   switch (type) {
@@ -116,7 +116,7 @@ export function SimplifiedActivityFeed({
             {onRefresh && (
               <button
                 onClick={onRefresh}
-                className="mt-2 text-xs text-yellow-700 hover:text-yellow-800"
+                className="mt-2 text-xs text-primary-700 hover:text-primary-800"
               >
                 Try again
               </button>
@@ -155,7 +155,7 @@ export function SimplifiedActivityFeed({
                     
                     {/* User name if available */}
                     {activity.userName && (
-                      <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium mt-0.5">
+                      <p className="text-xs text-primary-700 dark:text-primary-400 font-medium mt-0.5">
                         {activity.userName}
                       </p>
                     )}
@@ -177,7 +177,7 @@ export function SimplifiedActivityFeed({
         {/* Show more indicator */}
         {activities.length > 10 && (
           <div className="p-3 border-t bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">
-            <button className="w-full text-xs text-yellow-700 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors">
+            <button className="w-full text-xs text-primary-700 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
               View all {activities.length} activities
             </button>
           </div>

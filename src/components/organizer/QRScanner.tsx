@@ -688,15 +688,15 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
 
       {/* Processing Indicator - Animated */}
       {isProcessing && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-yellow-500/20 to-amber-500/20 dark:from-yellow-900/20 dark:to-amber-900/20 border-2 border-yellow-500/40 dark:border-yellow-900/40">
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 dark:from-yellow-900/10 dark:via-amber-900/10 dark:to-yellow-900/10 animate-pulse"></div>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-500/20 to-primary-600/20 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-500/40 dark:border-primary-900/40">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-primary-600/10 to-primary-500/10 dark:from-primary-900/10 dark:via-primary-800/10 dark:to-primary-900/10 animate-pulse"></div>
           <Alert className="border-0 bg-transparent relative">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="absolute inset-0 bg-yellow-500 dark:bg-yellow-600 rounded-full blur-lg opacity-50 animate-ping"></div>
-                <Scan className="h-6 w-6 text-yellow-600 dark:text-yellow-400 relative animate-spin" />
+                <div className="absolute inset-0 bg-primary-500 dark:bg-primary-600 rounded-full blur-lg opacity-50 animate-ping"></div>
+                <Scan className="h-6 w-6 text-primary-600 dark:text-primary-400 relative animate-spin" />
               </div>
-              <AlertDescription className="text-yellow-800 dark:text-yellow-300 font-medium text-base">
+              <AlertDescription className="text-primary-800 dark:text-primary-300 font-medium text-base">
                 Processing QR code...
               </AlertDescription>
             </div>
@@ -709,7 +709,7 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
         <div
           id="qr-reader"
           className={`rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${
-            isScanning ? 'shadow-yellow-500/50 ring-2 ring-yellow-500/30' : ''
+            isScanning ? 'shadow-primary-500/50 ring-2 ring-primary-500/30' : ''
           } ${scanAnimation ? 'scale-[1.02]' : 'scale-100'} ${
             !isMobile ? 'bg-gray-50 dark:bg-gray-800' : ''
           } ${isMobile ? 'w-full' : ''}`}
@@ -731,14 +731,14 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
             <div className="text-center px-4">
               <div className="relative inline-block mb-8">
                 <div className={`absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse ${
-                  isMobile 
-                    ? 'bg-gradient-to-r from-yellow-500 to-amber-500 dark:from-yellow-600 dark:to-amber-600'
-                    : 'bg-gradient-to-r from-yellow-400 to-amber-400 dark:from-yellow-500 dark:to-amber-500'
+                  isMobile
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700'
+                    : 'bg-gradient-to-r from-primary-400 to-primary-500 dark:from-primary-500 dark:to-primary-600'
                 }`}></div>
                 <div className={`relative rounded-full p-6 shadow-2xl ${
-                  isMobile 
-                    ? 'bg-gradient-to-r from-yellow-500 to-amber-500 dark:from-yellow-600 dark:to-amber-600'
-                    : 'bg-gradient-to-r from-yellow-400 to-amber-400 dark:from-yellow-500 dark:to-amber-500'
+                  isMobile
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700'
+                    : 'bg-gradient-to-r from-primary-400 to-primary-500 dark:from-primary-500 dark:to-primary-600'
                 }`}>
                   <Camera className="h-12 w-12 text-white" />
                 </div>
@@ -771,8 +771,8 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
         {isScanning && !lastScanResult && !isProcessing && (
           <div className="mt-4 p-4 rounded-xl bg-muted border border-border backdrop-blur-sm">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                <Camera className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+              <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+                <Camera className="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
               </div>
               <div className="flex-1">
                 <h4 className="text-sm font-semibold text-foreground mb-2">
@@ -782,34 +782,34 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
                   {isMobile ? (
                     <>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Position QR code within the highlighted frame
                       </li>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Hold steady for 1-2 seconds
                       </li>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Ensure good lighting for better scanning
                       </li>
                     </>
                   ) : (
                     <>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Position the mobile phone screen within the scanning frame
                       </li>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Hold the phone steady and ensure QR code is clearly visible
                       </li>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         Adjust phone brightness if needed for better scanning
                       </li>
                       <li className="flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 bg-yellow-500 dark:bg-yellow-400 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary-500 dark:bg-primary-400 rounded-full"></span>
                         The scanning area is optimized for mobile phone screens
                       </li>
                     </>
@@ -827,7 +827,7 @@ export function QRScanner({ onScan, onError, onCleanup, onScanningStateChange }:
           <Button
             onClick={startScanning}
             disabled={!cameraId}
-            className="flex-1 h-11 bg-gradient-to-r from-yellow-500 to-amber-500 dark:from-yellow-600 dark:to-amber-600 hover:from-yellow-600 hover:to-amber-600 dark:hover:from-yellow-700 dark:hover:to-amber-700 text-white font-semibold text-base rounded-xl shadow-lg shadow-yellow-500/30 dark:shadow-yellow-900/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-yellow-500/40 dark:hover:shadow-yellow-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-11 bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 hover:from-primary-600 hover:to-primary-700 dark:hover:from-primary-700 dark:hover:to-primary-800 text-white font-semibold text-base rounded-xl shadow-lg shadow-primary-500/30 dark:shadow-primary-900/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-500/40 dark:hover:shadow-primary-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Camera className="mr-2 h-5 w-5" />
             Start Scanner

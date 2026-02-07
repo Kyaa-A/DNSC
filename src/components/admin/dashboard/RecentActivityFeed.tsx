@@ -284,7 +284,7 @@ export function RecentActivityFeed({
               className={cn(
                 'p-2 rounded-lg transition-colors',
                 showFilterPanel || hasActiveFilters
-                  ? 'text-yellow-700 bg-yellow-50'
+                  ? 'text-primary-700 bg-primary-50'
                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
               )}
               title="Toggle filters"
@@ -320,7 +320,7 @@ export function RecentActivityFeed({
                   placeholder="Search activities..."
                   value={filter.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
             )}
@@ -332,7 +332,7 @@ export function RecentActivityFeed({
                 multiple
                 value={filter.types}
                 onChange={(e) => handleFilterChange('types', Array.from(e.target.selectedOptions, option => option.value))}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Types</option>
                 {Object.entries(ACTIVITY_TYPE_LABELS).map(([value, label]) => (
@@ -345,7 +345,7 @@ export function RecentActivityFeed({
                 multiple
                 value={filter.categories}
                 onChange={(e) => handleFilterChange('categories', Array.from(e.target.selectedOptions, option => option.value))}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Categories</option>
                 {Object.entries(ACTIVITY_CATEGORY_LABELS).map(([value, label]) => (
@@ -358,7 +358,7 @@ export function RecentActivityFeed({
                 multiple
                 value={filter.severities}
                 onChange={(e) => handleFilterChange('severities', Array.from(e.target.selectedOptions, option => option.value))}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
+                className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Severities</option>
                 {Object.entries(ACTIVITY_SEVERITY_LABELS).map(([value, label]) => (
@@ -420,7 +420,7 @@ export function RecentActivityFeed({
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 text-sm text-yellow-700 hover:text-yellow-800 hover:bg-yellow-50 rounded-lg transition-colors"
+                className="mt-4 px-4 py-2 text-sm text-primary-700 hover:text-primary-800 hover:bg-primary-50 rounded-lg transition-colors"
               >
                 Clear filters
               </button>

@@ -50,10 +50,10 @@ const SEVERITY_COLORS: Record<ActivitySeverity, {
   icon: string;
 }> = {
   info: {
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-800',
-    border: 'border-yellow-200',
-    icon: 'text-yellow-600',
+    bg: 'bg-primary-50',
+    text: 'text-primary-800',
+    border: 'border-primary-200',
+    icon: 'text-primary-600',
   },
   success: {
     bg: 'bg-green-50',
@@ -62,10 +62,10 @@ const SEVERITY_COLORS: Record<ActivitySeverity, {
     icon: 'text-green-500',
   },
   warning: {
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-700',
-    border: 'border-yellow-200',
-    icon: 'text-yellow-500',
+    bg: 'bg-orange-50',
+    text: 'text-orange-700',
+    border: 'border-orange-200',
+    icon: 'text-orange-500',
   },
   error: {
     bg: 'bg-red-50',
@@ -256,9 +256,9 @@ export function ActivityItem({
         <div className={cn(
           'flex-shrink-0 flex items-center justify-center rounded-full',
           compactMode ? 'w-8 h-8' : 'w-10 h-10',
-          colors.bg === 'bg-yellow-50' ? 'bg-yellow-100' : 
+          colors.bg === 'bg-primary-50' ? 'bg-primary-100' :
           colors.bg === 'bg-green-50' ? 'bg-green-100' :
-          colors.bg === 'bg-yellow-50' ? 'bg-yellow-100' :
+          colors.bg === 'bg-orange-50' ? 'bg-orange-100' :
           colors.bg === 'bg-red-50' ? 'bg-red-100' :
           colors.bg === 'bg-red-100' ? 'bg-red-200' : 'bg-gray-100'
         )}>
@@ -339,14 +339,14 @@ export function ActivityItem({
             <div className="flex items-center gap-2">
               <div className={cn(
                 'w-2 h-2 rounded-full',
-                entityInfo.type === 'student' ? 'bg-yellow-400' :
+                entityInfo.type === 'student' ? 'bg-primary-400' :
                 entityInfo.type === 'admin' ? 'bg-purple-400' :
                 entityInfo.type === 'program' ? 'bg-green-400' : 'bg-gray-400'
               )} />
               <span className={cn(
                 'font-medium',
                 compactMode ? 'text-xs' : 'text-sm',
-                entityInfo.type === 'student' ? 'text-yellow-800' :
+                entityInfo.type === 'student' ? 'text-primary-800' :
                 entityInfo.type === 'admin' ? 'text-purple-700' :
                 entityInfo.type === 'program' ? 'text-green-700' : 'text-gray-700'
               )}>

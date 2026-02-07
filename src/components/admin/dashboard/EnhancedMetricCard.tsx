@@ -12,9 +12,9 @@ const metricCardVariants = cva(
   {
     variants: {
       trend: {
-        up: "bg-gradient-to-br from-yellow-50 via-white to-amber-50 dark:from-yellow-900/20 dark:via-gray-800 dark:to-amber-900/20",
-        down: "bg-gradient-to-br from-yellow-50 via-white to-amber-50 dark:from-yellow-900/20 dark:via-gray-800 dark:to-amber-900/20",
-        neutral: "bg-gradient-to-br from-yellow-50 via-white to-amber-50 dark:from-yellow-900/20 dark:via-gray-800 dark:to-amber-900/20",
+        up: "bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-primary-900/20 dark:via-gray-800 dark:to-secondary-900/20",
+        down: "bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-primary-900/20 dark:via-gray-800 dark:to-secondary-900/20",
+        neutral: "bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-primary-900/20 dark:via-gray-800 dark:to-secondary-900/20",
       },
       size: {
         default: "p-0",
@@ -33,9 +33,9 @@ const trendVariants = cva(
   {
     variants: {
       trend: {
-        up: "text-yellow-700 dark:text-yellow-400",
-        down: "text-yellow-700 dark:text-yellow-400",
-        neutral: "text-yellow-700 dark:text-yellow-400",
+        up: "text-primary-700 dark:text-primary-400",
+        down: "text-primary-700 dark:text-primary-400",
+        neutral: "text-primary-700 dark:text-primary-400",
       }
     },
     defaultVariants: {
@@ -72,7 +72,7 @@ export function EnhancedMetricCard({
 }: EnhancedMetricCardProps) {
   // Determine trend icon based on trend prop
   const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-  const iconAccent = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+  const iconAccent = 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300';
   
   // Format percentage change display
   const formatPercentageChange = (change: number) => {

@@ -404,13 +404,13 @@ export function SessionSelector({
                   placeholder="Search sessions, events, or locations..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-yellow-400 focus:ring-yellow-400/20"
+                  className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-primary-400 focus:ring-primary-400/20"
                 />
               </div>
               
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] bg-background border-border text-foreground focus:border-yellow-400 focus:ring-yellow-400/20">
+                <SelectTrigger className="w-full sm:w-[180px] bg-background border-border text-foreground focus:border-primary-400 focus:ring-primary-400/20">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-border">

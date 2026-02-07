@@ -173,7 +173,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
             </p>
           </div>
           <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                 render={({ field }) => (
                   <FormItem className="space-y-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <User className="size-4 text-yellow-600" />
+                      <User className="size-4 text-primary-600" />
                       <FormLabel className="font-semibold text-gray-900 dark:text-gray-100">Student ID Number</FormLabel>
                     </div>
                     <FormControl>
@@ -221,7 +221,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                         inputMode="numeric"
                         pattern="[0-9]*"
                         placeholder="Input student ID number"
-                        className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </FormControl>
                     <FormMessage />
@@ -241,7 +241,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                         <Input 
                           {...field}
                           placeholder="Juan"
-                          className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20 transition-colors"
+                          className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20 transition-colors"
                           onBlur={(e) => handleNameBlur('firstName', e.target.value)}
                         />
                       </FormControl>
@@ -260,7 +260,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                         <Input 
                           {...field}
                           placeholder="Dela Cruz"
-                          className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20 transition-colors"
+                          className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20 transition-colors"
                           onBlur={(e) => handleNameBlur('lastName', e.target.value)}
                         />
                       </FormControl>
@@ -277,7 +277,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                 render={({ field }) => (
                   <FormItem className="space-y-2 relative">
                     <div className="flex items-center gap-2 mb-2">
-                      <Mail className="size-4 text-yellow-600" />
+                      <Mail className="size-4 text-primary-600" />
                       <FormLabel className="font-semibold text-gray-900 dark:text-gray-100">Email Address</FormLabel>
                     </div>
                     <FormControl>
@@ -285,7 +285,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                         {...field}
                         type="email"
                         placeholder="juan.delacruz@gmail.com"
-                        className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20 transition-colors"
+                        className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20 transition-colors"
                         onFocus={() => emailValue && setShowEmailSuggestions(emailSuggestions.length > 0)}
                         onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
                       />
@@ -298,14 +298,14 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                           <button
                             key={suggestion}
                             type="button"
-                            className="w-full text-left px-4 py-2 hover:bg-yellow-50 dark:hover:bg-gray-700 hover:text-yellow-800 dark:hover:text-gray-200 transition-colors text-sm border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                            className="w-full text-left px-4 py-2 hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-800 dark:hover:text-gray-200 transition-colors text-sm border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                             onClick={() => selectEmailSuggestion(suggestion)}
                           >
                             <span className="flex items-center gap-2">
                               <Mail className="size-3 text-gray-400 dark:text-gray-500" />
                               {suggestion}
                               {index === 0 && suggestion.includes('gmail.com') && (
-                                <span className="ml-auto text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded">Popular</span>
+                                <span className="ml-auto text-xs bg-primary-100 dark:bg-yellow-900/30 text-primary-800 dark:text-yellow-300 px-2 py-0.5 rounded">Popular</span>
                               )}
                             </span>
                           </button>
@@ -326,12 +326,12 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
-                        <GraduationCap className="size-4 text-yellow-600" />
+                        <GraduationCap className="size-4 text-primary-600" />
                         <FormLabel className="font-semibold text-gray-900 dark:text-gray-100">Program</FormLabel>
                       </div>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20">
+                          <SelectTrigger className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20">
                             <SelectValue placeholder="Select program" className="truncate text-left">
                               {selectedProgramDisplay || "Select program"}
                             </SelectValue>
@@ -339,7 +339,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                         </FormControl>
                         <SelectContent className="max-w-[400px]">
                           {programs.map((program) => (
-                            <SelectItem key={program.id} value={program.id} className="hover:bg-yellow-50 py-3">
+                            <SelectItem key={program.id} value={program.id} className="hover:bg-primary-50 py-3">
                               <div className="flex flex-col items-start gap-0.5 w-full">
                                 <span className="font-medium text-sm leading-tight truncate w-full">{program.name}</span>
                                 {program.displayName && (
@@ -361,18 +361,18 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
-                        <Calendar className="size-4 text-yellow-600" />
+                        <Calendar className="size-4 text-primary-600" />
                         <FormLabel className="font-semibold text-gray-900 dark:text-gray-100">Year Level</FormLabel>
                       </div>
                       <Select onValueChange={(value) => field.onChange(parseInt(value, 10))} defaultValue={String(field.value)}>
                         <FormControl>
-                          <SelectTrigger className="h-12 border-gray-200 focus:border-yellow-400 focus:ring-yellow-400/20">
+                          <SelectTrigger className="h-12 border-gray-200 focus:border-primary-400 focus:ring-primary-400/20">
                             <SelectValue placeholder="Select year" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {[1, 2, 3, 4, 5].map((y) => (
-                            <SelectItem key={y} value={String(y)} className="hover:bg-yellow-50">
+                            <SelectItem key={y} value={String(y)} className="hover:bg-primary-50">
                               <span className="font-medium">{y}{y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} Year</span>
                             </SelectItem>
                           ))}
@@ -394,7 +394,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed hover:bg-gray-300 hover:shadow-lg' 
                       : registrationSuccess
                       ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-yellow-500 hover:bg-yellow-600 text-black'
+                      : 'bg-primary-600 hover:bg-primary-700 text-white'
                   }`}
                 >
                   {isSubmitting ? (
@@ -438,7 +438,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
               ? 'bg-green-400' 
               : isSubmitting 
               ? 'bg-gray-300'
-              : 'bg-yellow-400'
+              : 'bg-primary-400'
           }`} />
         </div>
       </div>

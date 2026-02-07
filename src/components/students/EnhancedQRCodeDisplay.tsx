@@ -106,8 +106,8 @@ export function EnhancedQRCodeDisplay({
       const link = document.createElement('a');
       link.href = qrCodeUrl;
       const filename = useEnhanced 
-        ? `enhanced-dtp-qr-code-${studentData?.studentIdNumber || studentId}.png`
-        : `dtp-qr-code-${studentData?.studentIdNumber || studentId}.png`;
+        ? `enhanced-dnsc-qr-code-${studentData?.studentIdNumber || studentId}.png`
+        : `dnsc-qr-code-${studentData?.studentIdNumber || studentId}.png`;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
@@ -131,7 +131,7 @@ export function EnhancedQRCodeDisplay({
       <div className="py-2 sm:py-4">
         <div className="relative">
           <div className="mb-6">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-medium mb-3">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-primary-50 border border-primary-200 text-primary-700 text-xs font-medium mb-3">
               <Zap className="size-3.5" />
               <span>{useEnhanced ? 'Enhanced' : 'Standard'} QR Code</span>
             </div>
@@ -209,7 +209,7 @@ export function EnhancedQRCodeDisplay({
               </p>
               <Button
                 onClick={handleRetry}
-                className="w-full h-12 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full h-12 bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                 disabled={retryCount >= 3}
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
@@ -240,7 +240,7 @@ export function EnhancedQRCodeDisplay({
           
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
             <span className="text-gray-900">Welcome to </span>
-            <span className="text-yellow-500">DTP Events!</span>
+            <span className="text-primary-500">DNSC Events!</span>
           </h1>
           
           <p className="mt-1 text-sm text-gray-600 max-w-prose">
@@ -250,7 +250,7 @@ export function EnhancedQRCodeDisplay({
 
         {/* QR Code Display Card */}
         <Card className="group relative overflow-hidden rounded-xl border bg-white shadow-sm hover:shadow-lg transition-all duration-300">
-          <div className="absolute -right-10 -top-10 size-24 rounded-full bg-yellow-400/10 blur-xl group-hover:bg-yellow-400/15 transition-colors" />
+          <div className="absolute -right-10 -top-10 size-24 rounded-full bg-primary-400/10 blur-xl group-hover:bg-primary-400/15 transition-colors" />
 
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-xl font-semibold text-gray-900">
@@ -266,22 +266,22 @@ export function EnhancedQRCodeDisplay({
             {studentData && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2 text-gray-600">
-                  <GraduationCap className="size-4 text-yellow-600" />
+                  <GraduationCap className="size-4 text-primary-600" />
                   <span className="font-medium">Program:</span>
                   <span>{studentData.program?.name || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="size-4 text-yellow-600" />
+                  <Calendar className="size-4 text-primary-600" />
                   <span className="font-medium">Year:</span>
                   <span>{studentData.year}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 sm:col-span-2">
-                  <User className="size-4 text-yellow-600" />
+                  <User className="size-4 text-primary-600" />
                   <span className="font-medium">Email:</span>
                   <span>{studentData.email}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 sm:col-span-2">
-                  <Calendar className="size-4 text-yellow-600" />
+                  <Calendar className="size-4 text-primary-600" />
                   <span className="font-medium">Registered:</span>
                   <span>{formatDate(studentData.createdAt)}</span>
                 </div>
@@ -294,7 +294,7 @@ export function EnhancedQRCodeDisplay({
                 <div className="bg-white rounded-lg p-4 shadow-sm inline-block border-2 border-gray-100">
                   <Image
                     src={qrCodeUrl}
-                    alt="Your DTP Event QR Code"
+                    alt="Your DNSC Event QR Code"
                     width={320}
                     height={380}
                     className="w-full max-w-[280px] sm:max-w-[320px] h-auto rounded-lg"
@@ -303,12 +303,12 @@ export function EnhancedQRCodeDisplay({
                 </div>
 
                 {/* Instructions */}
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <Camera className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <Camera className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
                     <div className="text-left">
-                      <p className="text-amber-800 text-sm font-semibold mb-1">Save this QR code:</p>
-                      <p className="text-amber-700 text-sm leading-relaxed">
+                      <p className="text-primary-800 text-sm font-semibold mb-1">Save this QR code:</p>
+                      <p className="text-primary-700 text-sm leading-relaxed">
                         Screenshot or download this image to use for event check-ins.
                         {useEnhanced && ' This enhanced version includes additional student information for better tracking.'}
                       </p>
@@ -320,7 +320,7 @@ export function EnhancedQRCodeDisplay({
                 <Button
                   onClick={handleDownload}
                   disabled={!qrCodeUrl}
-                  className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-black font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group/btn"
+                  className="w-full h-12 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group/btn"
                 >
                   <Download className="mr-2 h-4 w-4 group-hover/btn:scale-110 transition-transform" />
                   Download {useEnhanced ? 'Enhanced ' : ''}QR Code
@@ -334,7 +334,7 @@ export function EnhancedQRCodeDisplay({
                       <span>Ready for Events</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Zap className="size-3 text-yellow-500" />
+                      <Zap className="size-3 text-primary-500" />
                       <span>{useEnhanced ? 'Enhanced Tracking' : 'Instant Check-in'}</span>
                     </div>
                   </div>
@@ -344,7 +344,7 @@ export function EnhancedQRCodeDisplay({
           </CardContent>
 
           {/* Bottom Accent Line */}
-          <div className="h-0.5 w-0 bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-500 group-hover:w-full" />
+          <div className="h-0.5 w-0 bg-gradient-to-r from-primary-400 to-primary-500 transition-all duration-500 group-hover:w-full" />
         </Card>
       </div>
     </div>

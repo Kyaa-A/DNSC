@@ -148,7 +148,7 @@ export default async function DashboardPage() {
         <div className="fixed bottom-20 right-4 z-40 sm:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button aria-label="Open recent activity" className="h-12 w-12 rounded-full p-0 bg-yellow-500 text-black hover:bg-yellow-600 shadow-lg">
+              <Button aria-label="Open recent activity" className="h-12 w-12 rounded-full p-0 bg-primary-600 text-white hover:bg-primary-700 shadow-lg">
                 <BarChart3 className="h-5 w-5" />
               </Button>
             </SheetTrigger>

@@ -337,8 +337,8 @@ export function ManualInput({ onScan }: ManualInputProps) {
       <div className="w-full">
         <div className="text-center p-6">
           <div className="relative inline-block mb-4">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-            <div className="relative bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full p-4 shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+            <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 rounded-full p-4 shadow-2xl">
               <Keyboard className="h-8 w-8 text-white" />
             </div>
           </div>
@@ -362,7 +362,7 @@ export function ManualInput({ onScan }: ManualInputProps) {
                 onKeyPress={handleKeyPress}
                 placeholder="Enter student ID number..."
                 disabled={isProcessing}
-                className="text-center text-base sm:text-lg font-mono bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 h-12 sm:h-14"
+                className="text-center text-base sm:text-lg font-mono bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 h-12 sm:h-14"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
@@ -373,7 +373,7 @@ export function ManualInput({ onScan }: ManualInputProps) {
             <Button
               type="submit"
               disabled={!studentIdNumber.trim() || isProcessing}
-              className="w-full h-12 sm:h-14 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-semibold text-sm sm:text-base rounded-xl shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-yellow-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-12 sm:h-14 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-sm sm:text-base rounded-xl shadow-lg shadow-primary-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isProcessing ? (
                 <>
@@ -391,15 +391,15 @@ export function ManualInput({ onScan }: ManualInputProps) {
 
           {/* Processing Indicator */}
           {isProcessing && (
-            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/40">
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 animate-pulse"></div>
+            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-primary-500/20 to-primary-600/20 border-2 border-primary-500/40">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 via-primary-600/10 to-primary-500/10 animate-pulse"></div>
               <Alert className="border-0 bg-transparent relative">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-yellow-500 rounded-full blur-lg opacity-50 animate-ping"></div>
-                    <Loader2 className="h-6 w-6 text-yellow-600 relative animate-spin" />
+                    <div className="absolute inset-0 bg-primary-500 rounded-full blur-lg opacity-50 animate-ping"></div>
+                    <Loader2 className="h-6 w-6 text-primary-600 relative animate-spin" />
                   </div>
-                  <AlertDescription className="text-yellow-800 font-medium text-base">
+                  <AlertDescription className="text-primary-800 font-medium text-base">
                     Processing student ID...
                   </AlertDescription>
                 </div>
@@ -410,22 +410,22 @@ export function ManualInput({ onScan }: ManualInputProps) {
           {/* Usage Tips */}
           <div className="mt-6 p-4 rounded-xl bg-muted border border-border backdrop-blur-sm">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Keyboard className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <Keyboard className="h-5 w-5 text-primary-600 flex-shrink-0" />
               </div>
               <div className="flex-1">
                 <h4 className="text-sm font-semibold text-foreground mb-2">Manual Entry Tips</h4>
                 <ul className="text-xs text-muted-foreground space-y-2">
                   <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full"></span>
                     Enter the student&apos;s ID number (not the CUID)
                   </li>
                   <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full"></span>
                     Press Enter or click &quot;Record Attendance&quot; to submit
                   </li>
                   <li className="flex items-center gap-3">
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full"></span>
                     Input will clear automatically after successful recording
                   </li>
                 </ul>

@@ -20,10 +20,10 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground active:bg-accent/80 dark:hover:bg-accent/50 dark:active:bg-accent/40",
         link: "text-primary underline-offset-4 hover:underline active:text-primary/80",
-        yellow:
-          "bg-yellow-400 text-black hover:bg-yellow-500 active:bg-yellow-600 focus-visible:ring-yellow-400/30",
-        yellowLight:
-          "bg-yellow-100 text-yellow-900 hover:bg-yellow-200 active:bg-yellow-300 focus-visible:ring-yellow-300/40 dark:bg-yellow-200/20 dark:text-yellow-100 dark:hover:bg-yellow-200/30 dark:active:bg-yellow-200/40",
+        brand:
+          "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-400/30",
+        brandLight:
+          "bg-primary-100 text-primary-900 hover:bg-primary-200 active:bg-primary-300 focus-visible:ring-primary-300/40 dark:bg-primary-200/20 dark:text-primary-100 dark:hover:bg-primary-200/30 dark:active:bg-primary-200/40",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

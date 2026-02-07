@@ -183,10 +183,10 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
   };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-yellow-50 via-white to-amber-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen py-8 px-4">
+    <div className="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen py-8 px-4">
       {/* Background Elements - More subtle for better contrast */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400/5 dark:bg-yellow-400/3 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/5 dark:bg-amber-400/3 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary-400/5 dark:bg-primary-400/3 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary-400/5 dark:bg-secondary-400/3 rounded-full blur-3xl" />
       
       {/* Subtle overlay to enhance form contrast */}
       <div className="absolute inset-0 bg-white/20 dark:bg-gray-900/20 pointer-events-none" />
@@ -194,14 +194,14 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
       <div className="relative mx-auto max-w-2xl">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800/50 text-yellow-800 dark:text-yellow-200 text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800/50 text-primary-800 dark:text-primary-200 text-sm font-medium mb-4">
             <Zap className="size-4" />
-            <span>Join DTP Events</span>
+            <span>Join DNSC Events</span>
           </div>
           
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
             <span className="text-gray-900 dark:text-white">Student </span>
-            <span className="text-yellow-500 dark:text-yellow-400">Registration</span>
+            <span className="text-primary-500 dark:text-primary-400">Registration</span>
           </h1>
           
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg mx-auto">
@@ -211,13 +211,13 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
 
         {/* Registration Form Card */}
         <div className="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-2xl hover:shadow-3xl transition-all duration-300 ring-1 ring-gray-100 dark:ring-gray-700">
-          <div className="absolute -right-10 -top-10 size-24 rounded-full bg-yellow-400/8 dark:bg-yellow-400/4 blur-xl group-hover:bg-yellow-400/12 dark:group-hover:bg-yellow-400/6 transition-colors" />
+          <div className="absolute -right-10 -top-10 size-24 rounded-full bg-primary-400/8 dark:bg-primary-400/4 blur-xl group-hover:bg-primary-400/12 dark:group-hover:bg-primary-400/6 transition-colors" />
           
           <form onSubmit={handleSubmit(handleFormSubmit)} className="relative p-6 sm:p-8 space-y-6">
             {/* Student ID */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 mb-2">
-                <User className="size-4 text-yellow-600 dark:text-yellow-400" />
+                <User className="size-4 text-primary-600 dark:text-primary-400" />
                 <Label htmlFor="studentIdNumber" className="font-semibold text-gray-900 dark:text-white">Student ID Number</Label>
               </div>
               <Input 
@@ -227,7 +227,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                 pattern="[0-9]*"
                 {...register('studentIdNumber')} 
                 placeholder="Input your student ID number"
-                className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
               {errors.studentIdNumber && (
                 <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -245,7 +245,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                   id="firstName" 
                   {...register('firstName')} 
                   placeholder="Juan"
-                  className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   onBlur={(e) => handleNameBlur('firstName', e.target.value)}
                 />
                 {errors.firstName && (
@@ -262,7 +262,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                   id="lastName" 
                   {...register('lastName')} 
                   placeholder="Dela Cruz"
-                  className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                  className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                   onBlur={(e) => handleNameBlur('lastName', e.target.value)}
                 />
                 {errors.lastName && (
@@ -277,7 +277,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
             {/* Email with Suggestions */}
             <div className="space-y-2 relative">
               <div className="flex items-center gap-2 mb-2">
-                <Mail className="size-4 text-yellow-600 dark:text-yellow-400" />
+                <Mail className="size-4 text-primary-600 dark:text-primary-400" />
                 <Label htmlFor="email" className="font-semibold text-gray-900 dark:text-white">Email Address</Label>
               </div>
               <Input 
@@ -285,7 +285,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                 type="email" 
                 {...register('email')} 
                 placeholder="juan.delacruz@gmail.com"
-                className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 transition-colors text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 onFocus={() => emailValue && setShowEmailSuggestions(emailSuggestions.length > 0)}
                 onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
               />
@@ -297,14 +297,14 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                     <button
                       key={suggestion}
                       type="button"
-                      className="w-full text-left px-4 py-2 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-800 dark:hover:text-yellow-200 transition-colors text-sm border-b border-gray-200 dark:border-gray-600 last:border-b-0"
+                      className="w-full text-left px-4 py-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-800 dark:hover:text-primary-200 transition-colors text-sm border-b border-gray-200 dark:border-gray-600 last:border-b-0"
                       onClick={() => selectEmailSuggestion(suggestion)}
                     >
                       <span className="flex items-center gap-2">
                         <Mail className="size-3 text-gray-500 dark:text-gray-400" />
                         {suggestion}
                         {suggestion.includes('gmail.com') && (
-                          <span className="ml-auto text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded">Popular</span>
+                          <span className="ml-auto text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-0.5 rounded">Popular</span>
                         )}
                         {suggestion.includes('umindanao.edu.ph') && (
                           <span className="ml-auto text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">University</span>
@@ -327,18 +327,18 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <GraduationCap className="size-4 text-yellow-600 dark:text-yellow-400" />
+                  <GraduationCap className="size-4 text-primary-600 dark:text-primary-400" />
                   <Label htmlFor="programId" className="font-semibold text-gray-900 dark:text-white">Program</Label>
                 </div>
                 <Select onValueChange={(value) => setValue('programId', value, { shouldValidate: true })} {...register('programId')}>
-                  <SelectTrigger className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 text-gray-900 dark:text-white">
+                  <SelectTrigger className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 text-gray-900 dark:text-white">
                     <SelectValue placeholder="Select your program" className="truncate text-left">
                       {selectedProgramDisplay || "Select your program"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="max-w-[400px]">
                     {programs.map((p) => (
-                      <SelectItem key={p.id} value={p.id} className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20 py-3">
+                      <SelectItem key={p.id} value={p.id} className="hover:bg-primary-50 dark:hover:bg-primary-900/20 py-3">
                         <div className="flex flex-col items-start gap-0.5 w-full">
                           <span className="font-medium text-sm leading-tight truncate w-full">{p.name}</span>
                           <span className="text-xs text-gray-500 dark:text-gray-400 leading-tight truncate w-full">({p.displayName})</span>
@@ -357,20 +357,20 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
               
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="size-4 text-yellow-600 dark:text-yellow-400" />
+                  <Calendar className="size-4 text-primary-600 dark:text-primary-400" />
                   <Label htmlFor="year" className="font-semibold text-gray-900 dark:text-white">Year Level</Label>
                 </div>
                 <Select onValueChange={(value) => setValue('year', parseInt(value, 10), { shouldValidate: true })} {...register('year')}>
-                  <SelectTrigger className="h-12 border-gray-200 dark:border-gray-600 focus:border-yellow-400 dark:focus:border-yellow-500 focus:ring-yellow-400/20 dark:focus:ring-yellow-500/20 text-gray-900 dark:text-white">
+                  <SelectTrigger className="h-12 border-gray-200 dark:border-gray-600 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 text-gray-900 dark:text-white">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4].map((y) => (
-                      <SelectItem key={y} value={String(y)} className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
+                      <SelectItem key={y} value={String(y)} className="hover:bg-primary-50 dark:hover:bg-primary-900/20">
                         <span className="font-medium">{y}{y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} Year</span>
                       </SelectItem>
                     ))}
-                    <SelectItem value="0" className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
+                    <SelectItem value="0" className="hover:bg-primary-50 dark:hover:bg-primary-900/20">
                       <span className="font-medium">Other</span>
                     </SelectItem>
                   </SelectContent>
@@ -414,7 +414,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
                     ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed hover:bg-gray-300 dark:hover:bg-gray-600 hover:shadow-lg' 
                     : registrationSuccess
                     ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white'
-                    : 'bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 dark:active:bg-yellow-700 text-black dark:text-black'
+                    : 'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 dark:bg-primary-500 dark:hover:bg-primary-600 dark:active:bg-primary-700 text-white'
                 }`}
               >
                 {isSubmitting ? (
@@ -462,7 +462,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
               ? 'bg-gradient-to-r from-green-400 to-green-500 dark:from-green-500 dark:to-green-600' 
               : isFormDisabled 
               ? 'bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-500'
-              : 'bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-yellow-500 dark:to-yellow-600'
+              : 'bg-gradient-to-r from-primary-400 to-primary-500 dark:from-primary-500 dark:to-primary-600'
           }`} />
         </div>
       </div>

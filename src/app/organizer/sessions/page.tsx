@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar, Users, Clock } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'My Sessions | DTP Attendance Organizer',
+  title: 'My Sessions | DNSC Attendance Organizer',
   description: 'View and manage your assigned attendance sessions',
 };
 

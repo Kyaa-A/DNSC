@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, Shield, QrCode } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Manual Entry | DTP Attendance Organizer',
+  title: 'Manual Entry | DNSC Attendance Organizer',
   description: 'Manual student entry for attendance scanning when QR codes are not available',
 };
 
