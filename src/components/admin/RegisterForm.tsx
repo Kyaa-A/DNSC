@@ -305,7 +305,7 @@ export function RegisterForm({ onSubmit, isSubmitting, initialData, hideHeader =
                               <Mail className="size-3 text-gray-400 dark:text-gray-500" />
                               {suggestion}
                               {index === 0 && suggestion.includes('gmail.com') && (
-                                <span className="ml-auto text-xs bg-primary-100 dark:bg-yellow-900/30 text-primary-800 dark:text-yellow-300 px-2 py-0.5 rounded">Popular</span>
+                                <span className="ml-auto text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 px-2 py-0.5 rounded">Popular</span>
                               )}
                             </span>
                           </button>

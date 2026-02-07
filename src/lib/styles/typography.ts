@@ -1,5 +1,5 @@
 /**
- * Typography System for DTP Attendance
+ * Typography System for DNSC Attendance
  * 
  * This file defines the typography hierarchy using Tailwind CSS v4 @theme directive
  * and provides utility functions for consistent text styling across components.

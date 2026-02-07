@@ -1,5 +1,5 @@
 /**
- * Accessibility Utilities for DTP Attendance
+ * Accessibility Utilities for DNSC Attendance
  *
  * This file provides utilities for ensuring proper contrast ratios
  * and accessibility compliance across the interface.

@@ -1,5 +1,5 @@
 /**
- * Status Colors for DTP Attendance
+ * Status Colors for DNSC Attendance
  *
  * This file defines status-based color coding using semantic color mapping
  * for consistent status indicators across the interface.

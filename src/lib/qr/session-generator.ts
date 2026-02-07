@@ -140,8 +140,8 @@ export async function createBrandedSessionQRCode(
     });
     const qrCodeBuffer = Buffer.from(qrCodeDataUrl.split(',')[1], 'base64');
 
-    // Use DTP logo
-    const logoPath = path.join(process.cwd(), 'public/logo/dtp.png');
+    // Use DNSC logo
+    const logoPath = path.join(process.cwd(), 'public/logo/dnsc.webp');
     const logoBuffer = await sharp(logoPath)
       .resize(60, 60)
       .png()
@@ -167,7 +167,7 @@ export async function createBrandedSessionQRCode(
 
     return canvas
       .composite([
-        { input: logoBuffer, top: 20, left: 130 }, // DTP logo at top center
+        { input: logoBuffer, top: 20, left: 130 }, // DNSC logo at top center
         { input: qrCodeBuffer, top: 100, left: 40 }, // QR code below logo
       ])
       .png()
@@ -193,8 +193,8 @@ export async function createBrandedStudentQRCode(
     });
     const qrCodeBuffer = Buffer.from(qrCodeDataUrl.split(',')[1], 'base64');
 
-    // Use DTP logo
-    const logoPath = path.join(process.cwd(), 'public/logo/dtp.png');
+    // Use DNSC logo
+    const logoPath = path.join(process.cwd(), 'public/logo/dnsc.webp');
     const logoBuffer = await sharp(logoPath)
       .resize(80, 80)
       .png()
@@ -212,7 +212,7 @@ export async function createBrandedStudentQRCode(
 
     return canvas
       .composite([
-        { input: logoBuffer, top: 20, left: 120 }, // DTP logo at top center
+        { input: logoBuffer, top: 20, left: 120 }, // DNSC logo at top center
         { input: qrCodeBuffer, top: 120, left: 40 }, // QR code below logo
       ])
       .png()

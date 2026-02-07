@@ -225,7 +225,7 @@ export function InviteOrganizerForm({
                       <Input 
                         {...field}
                         type="email"
-                        placeholder="organizer@dtp.edu.my"
+                        placeholder="organizer@dnsc.edu.ph"
                         className="h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-primary-400 dark:focus:border-primary-500 focus:ring-primary-400/20 dark:focus:ring-primary-500/20 transition-colors placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       />
                     </FormControl>
