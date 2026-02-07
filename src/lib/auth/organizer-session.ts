@@ -1,6 +1,6 @@
-import { createSupabaseServerClient } from '@/lib/auth/supabase-server';
+import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/client';
-import { UserWithRole } from '@/lib/types/auth';
+import { UserWithRole, UserRole } from '@/lib/types/auth';
 import { OrganizerPermissions } from '@/lib/types/organizer';
 
 /**
@@ -46,16 +46,21 @@ export interface OrganizerSessionState {
  */
 export async function getEnhancedOrganizerSession(): Promise<EnhancedOrganizerSession | null> {
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data: { user: authUser }, error } = await supabase.auth.getUser();
+    const session = await auth();
 
-    if (error || !authUser) {
+    if (!session?.user) {
       return null;
     }
 
-    const user = authUser as UserWithRole;
-    const isOrganizer = user.user_metadata?.role === 'organizer';
-    const isAdmin = user.user_metadata?.role === 'admin';
+    const user: UserWithRole = {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role: session.user.role as UserRole,
+    };
+
+    const isOrganizer = user.role === 'organizer';
+    const isAdmin = user.role === 'admin';
 
     if (!isOrganizer && !isAdmin) {
       return null;
@@ -63,7 +68,7 @@ export async function getEnhancedOrganizerSession(): Promise<EnhancedOrganizerSe
 
     // Get organizer record from database
     const organizer = await prisma.organizer.findUnique({
-      where: { email: user.email! },
+      where: { email: user.email },
       include: {
         eventAssignments: {
           include: {
@@ -107,9 +112,9 @@ export async function getEnhancedOrganizerSession(): Promise<EnhancedOrganizerSe
     const permissions: OrganizerPermissions = {
       canScanAttendance: isOrganizer || isAdmin,
       canViewSessions: isOrganizer || isAdmin,
-      canManageSessions: isAdmin, // Only admins can manage sessions
-      canViewAnalytics: isAdmin, // Only admins can view analytics
-      canExportData: isAdmin, // Only admins can export data
+      canManageSessions: isAdmin,
+      canViewAnalytics: isAdmin,
+      canExportData: isAdmin,
     };
 
     return {
@@ -265,12 +270,11 @@ export async function getOrganizerActiveSessions(organizerId: string): Promise<A
   attendanceCount: number;
 }>> {
   try {
-    // Get sessions where organizer has recorded attendance recently
     const recentAttendance = await prisma.attendance.findMany({
       where: {
         scannedBy: organizerId,
         createdAt: {
-          gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
       },
       include: {
@@ -290,7 +294,6 @@ export async function getOrganizerActiveSessions(organizerId: string): Promise<A
       },
     });
 
-    // Group by session and get latest activity
     const sessionMap = new Map<string, {
       sessionId: string;
       eventId: string;
@@ -345,7 +348,7 @@ export async function validateOrganizerSession(
 }> {
   try {
     const session = await getEnhancedOrganizerSession();
-    
+
     if (!session || session.organizerId !== organizerId) {
       return {
         isValid: false,

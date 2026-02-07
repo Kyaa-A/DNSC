@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/client';
-import { createSupabaseServerClient } from '@/lib/auth/supabase-server';
+import { auth } from '@/lib/auth/auth';
 import {
   parseQRData,
   determineScanType,
-  // createScanResult,
   validateDTPQRFormat,
 } from '@/lib/scanning/scan-logic';
 import {
-  // ScanRequest,
   ScanResponse,
   ScanProcessingResult,
   ScanContextData,
   StudentValidationResult,
-  // SessionValidationResult,
   ScanActionType,
   AttendanceRecord,
 } from '@/lib/types/scanning';
@@ -42,20 +39,19 @@ const scanRequestSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
+
   try {
     // Parse and validate request body
     const body = await request.json();
     const validatedData = scanRequestSchema.parse(body);
-    
+
     // Get authenticated user
-    const supabase = await createSupabaseServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    const session = await auth();
+
+    if (!session?.user) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Authentication required',
           message: 'Please log in to process scans'
         },
@@ -77,8 +73,8 @@ export async function POST(request: NextRequest) {
 
     if (!organizer || !organizer.isActive) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Organizer not found or inactive',
           message: 'Invalid organizer access'
         },
@@ -88,11 +84,11 @@ export async function POST(request: NextRequest) {
 
     // Parse QR data
     const parsedQR = parseQRData(validatedData.qrData);
-    
+
     if (!parsedQR.isValid) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid QR code',
           message: parsedQR.error || 'QR code format is not recognized'
         },
@@ -102,11 +98,11 @@ export async function POST(request: NextRequest) {
 
     // Validate DTP QR format
     const qrValidation = validateDTPQRFormat(validatedData.qrData);
-    
+
     if (!qrValidation.isValid) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid DTP QR code',
           message: qrValidation.error || 'QR code is not a valid DTP format'
         },
@@ -115,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get session information
-    const session = await prisma.session.findUnique({
+    const attendanceSession = await prisma.session.findUnique({
       where: { id: validatedData.sessionId },
       include: {
         event: {
@@ -136,10 +132,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!session) {
+    if (!attendanceSession) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Session not found',
           message: 'The specified session does not exist'
         },
@@ -148,10 +144,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if organizer is assigned to this session
-    if (session.event.organizerAssignments.length === 0) {
+    if (attendanceSession.event.organizerAssignments.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Access denied',
           message: 'You are not authorized to manage this session'
         },
@@ -161,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // Validate student if it's a student QR code
     let studentValidation: StudentValidationResult = { isValid: false };
-    
+
     if (qrValidation.type === 'student' && qrValidation.studentId) {
       const student = await prisma.student.findUnique({
         where: { id: qrValidation.studentId },
@@ -191,8 +187,8 @@ export async function POST(request: NextRequest) {
         };
       } else {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Student not found',
             message: 'The student associated with this QR code is not found or inactive'
           },
@@ -205,19 +201,19 @@ export async function POST(request: NextRequest) {
     const currentTime = new Date();
     const scanContext: ScanContextData = {
       currentSession: {
-        id: session.id,
-        eventId: session.eventId,
-        name: session.name,
-        startTime: session.event.startDate,
-        endTime: session.event.endDate,
-        isActive: session.isActive,
-        timeInWindow: session.timeInStart && session.timeInEnd ? {
-          start: session.timeInStart,
-          end: session.timeInEnd,
+        id: attendanceSession.id,
+        eventId: attendanceSession.eventId,
+        name: attendanceSession.name,
+        startTime: attendanceSession.event.startDate,
+        endTime: attendanceSession.event.endDate,
+        isActive: attendanceSession.isActive,
+        timeInWindow: attendanceSession.timeInStart && attendanceSession.timeInEnd ? {
+          start: attendanceSession.timeInStart,
+          end: attendanceSession.timeInEnd,
         } : undefined,
-        timeOutWindow: session.timeOutStart && session.timeOutEnd ? {
-          start: session.timeOutStart,
-          end: session.timeOutEnd,
+        timeOutWindow: attendanceSession.timeOutStart && attendanceSession.timeOutEnd ? {
+          start: attendanceSession.timeOutStart,
+          end: attendanceSession.timeOutEnd,
         } : undefined,
       },
       currentOrganizer: {
@@ -236,8 +232,8 @@ export async function POST(request: NextRequest) {
 
     if (!scanType.isAllowed) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Scan not allowed',
           message: scanType.reason
         },
@@ -246,8 +242,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Get existing attendance record for this student in this session
-    // We only need one record per student per session since we'll update it for both time_in and time_out
-    // This prevents duplicate records and ensures proper attendance tracking
     let existingRecord = null;
     if (studentValidation.isValid && studentValidation.student) {
       existingRecord = await prisma.attendance.findFirst({
@@ -261,8 +255,8 @@ export async function POST(request: NextRequest) {
       // Validate scan sequence and prevent duplicates
       if (scanType.type === 'time_out' && !existingRecord) {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Invalid scan sequence',
             message: 'Cannot scan time-out without first scanning time-in for this session.'
           },
@@ -272,8 +266,8 @@ export async function POST(request: NextRequest) {
 
       if (scanType.type === 'time_in' && existingRecord && existingRecord.timeIn) {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Already checked in',
             message: 'You have already checked in for this session.'
           },
@@ -283,8 +277,8 @@ export async function POST(request: NextRequest) {
 
       if (scanType.type === 'time_out' && existingRecord && existingRecord.timeOut) {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Already checked out',
             message: 'You have already checked out for this session.'
           },
@@ -294,20 +288,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create or update attendance record
-    // For time_in: Create new record if none exists
-    // For time_out: Update existing record to add timeOut timestamp
     let attendanceRecord: AttendanceRecord | null = null;
-    
+
     if (studentValidation.isValid && studentValidation.student) {
       let newAttendance;
-      
+
       if (scanType.type === 'time_in') {
-        // Create new attendance record for time_in
         newAttendance = await prisma.attendance.create({
           data: {
             studentId: studentValidation.student.id,
             sessionId: validatedData.sessionId,
-            eventId: session.eventId,
+            eventId: attendanceSession.eventId,
             scanType: scanType.type as ScanActionType,
             scannedBy: validatedData.organizerId,
             timeIn: currentTime,
@@ -317,19 +308,17 @@ export async function POST(request: NextRequest) {
           },
         });
       } else if (scanType.type === 'time_out' && existingRecord) {
-        // Update existing attendance record for time_out
         newAttendance = await prisma.attendance.update({
           where: { id: existingRecord.id },
           data: {
             timeOut: currentTime,
-            scanType: 'time_out', // Update scanType to reflect the latest action
+            scanType: 'time_out',
             scannedBy: validatedData.organizerId,
             ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
             userAgent: validatedData.metadata?.userAgent || request.headers.get('user-agent') || null,
           },
         });
       } else {
-        // This should not happen due to validation above, but handle gracefully
         throw new Error('Invalid scan type or missing existing record for time_out');
       }
 
@@ -387,14 +376,13 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Scan processing error:', error);
-    
+
     const processingTime = Date.now() - startTime;
-    
-    // Handle validation errors
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation error',
           message: error.issues.map(e => e.message).join(', '),
           details: error.issues
@@ -403,10 +391,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle other errors
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Internal server error',
         message: 'An unexpected error occurred while processing the scan',
         processingTime
@@ -423,13 +410,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
-    const supabase = await createSupabaseServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    const session = await auth();
+
+    if (!session?.user) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Authentication required'
         },
         { status: 401 }
@@ -443,8 +429,8 @@ export async function GET(request: NextRequest) {
 
     if (!sessionId || !organizerId) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Missing parameters',
           message: 'sessionId and organizerId are required'
         },
@@ -453,7 +439,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get session information
-    const session = await prisma.session.findUnique({
+    const attendanceSession = await prisma.session.findUnique({
       where: { id: sessionId },
       include: {
         event: {
@@ -479,10 +465,10 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    if (!session) {
+    if (!attendanceSession) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Session not found'
         },
         { status: 404 }
@@ -490,10 +476,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if organizer is assigned to this session
-    if (session.event.organizerAssignments.length === 0) {
+    if (attendanceSession.event.organizerAssignments.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Access denied'
         },
         { status: 403 }
@@ -519,19 +505,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       session: {
-        id: session.id,
-        name: session.name,
-        event: session.event,
-        isActive: session.isActive,
-        timeInWindow: session.timeInStart && session.timeInEnd ? {
-          start: session.timeInStart,
-          end: session.timeInEnd,
+        id: attendanceSession.id,
+        name: attendanceSession.name,
+        event: attendanceSession.event,
+        isActive: attendanceSession.isActive,
+        timeInWindow: attendanceSession.timeInStart && attendanceSession.timeInEnd ? {
+          start: attendanceSession.timeInStart,
+          end: attendanceSession.timeInEnd,
         } : null,
-        timeOutWindow: session.timeOutStart && session.timeOutEnd ? {
-          start: session.timeOutStart,
-          end: session.timeOutEnd,
+        timeOutWindow: attendanceSession.timeOutStart && attendanceSession.timeOutEnd ? {
+          start: attendanceSession.timeOutStart,
+          end: attendanceSession.timeOutEnd,
         } : null,
-        totalScans: session._count.attendance,
+        totalScans: attendanceSession._count.attendance,
       },
       recentScans: recentScans.map(scan => ({
         id: scan.id,
@@ -544,10 +530,10 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Scan status error:', error);
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Internal server error',
         message: 'An unexpected error occurred'
       },

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/auth/supabase-server'
-import { UserWithRole } from '@/lib/types/auth'
+import { auth } from '@/lib/auth/auth'
+import { UserWithRole, UserRole } from '@/lib/types/auth'
 import { authenticateApiRequest } from '@/lib/auth/api-auth'
 
 /**
@@ -38,7 +38,6 @@ export async function authenticateOrganizerRequest(
   request: NextRequest
 ): Promise<OrganizerAuthResult> {
   try {
-    // Use existing API auth with organizer role
     const authResult = await authenticateApiRequest(request, {
       allowedRoles: ['admin', 'organizer'],
       requireAuth: true,
@@ -53,11 +52,9 @@ export async function authenticateOrganizerRequest(
     }
 
     const user = authResult.user
-    const isOrganizer = user.user_metadata?.role === 'organizer'
-    const isAdmin = user.user_metadata?.role === 'admin'
+    const isOrganizer = user.role === 'organizer'
+    const isAdmin = user.role === 'admin'
 
-    // TODO: Get assigned events from database when Event model is implemented
-    // For now, return empty array
     const assignedEvents: string[] = []
 
     return {
@@ -82,18 +79,22 @@ export async function authenticateOrganizerRequest(
  */
 export async function getOrganizerSession(): Promise<OrganizerSession | null> {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { data: { user: authUser }, error } = await supabase.auth.getUser()
+    const session = await auth()
 
-    if (error || !authUser) {
+    if (!session?.user) {
       return null
     }
 
-    const user = authUser as UserWithRole
-    const isOrganizer = user.user_metadata?.role === 'organizer'
-    const isAdmin = user.user_metadata?.role === 'admin'
+    const user: UserWithRole = {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      role: session.user.role as UserRole,
+    }
 
-    // TODO: Get assigned events from database when Event model is implemented
+    const isOrganizer = user.role === 'organizer'
+    const isAdmin = user.role === 'admin'
+
     const assignedEvents: string[] = []
 
     return {
@@ -104,7 +105,7 @@ export async function getOrganizerSession(): Promise<OrganizerSession | null> {
       permissions: {
         canScanAttendance: isOrganizer || isAdmin,
         canViewSessions: isOrganizer || isAdmin,
-        canManageSessions: isAdmin, // Only admins can manage sessions
+        canManageSessions: isAdmin,
       },
     }
   } catch (error) {
@@ -122,8 +123,8 @@ export function hasOrganizerPermission(
 ): boolean {
   if (!user) return false
 
-  const isOrganizer = user.user_metadata?.role === 'organizer'
-  const isAdmin = user.user_metadata?.role === 'admin'
+  const isOrganizer = user.role === 'organizer'
+  const isAdmin = user.role === 'admin'
 
   switch (permission) {
     case 'canScanAttendance':
@@ -131,7 +132,7 @@ export function hasOrganizerPermission(
     case 'canViewSessions':
       return isOrganizer || isAdmin
     case 'canManageSessions':
-      return isAdmin // Only admins can manage sessions
+      return isAdmin
     default:
       return false
   }
@@ -147,14 +148,12 @@ export function validateOrganizerEventAccess(
 ): boolean {
   if (!user) return false
 
-  const isAdmin = user.user_metadata?.role === 'admin'
-  
-  // Admins have access to all events
+  const isAdmin = user.role === 'admin'
+
   if (isAdmin) return true
 
-  const isOrganizer = user.user_metadata?.role === 'organizer'
-  
-  // Organizers can only access assigned events
+  const isOrganizer = user.role === 'organizer'
+
   if (isOrganizer) {
     return assignedEvents.includes(eventId)
   }
@@ -167,9 +166,9 @@ export function validateOrganizerEventAccess(
  */
 export function createOrganizerAuthErrorResponse(result: OrganizerAuthResult) {
   return Response.json(
-    { 
+    {
       error: result.error || 'Organizer authentication failed',
-      success: false 
+      success: false
     },
     { status: result.statusCode || 401 }
   )
@@ -183,12 +182,11 @@ export function withOrganizerOnlyAuth<T extends unknown[]>(
 ) {
   return async (request: NextRequest, ...args: T): Promise<Response> => {
     const authResult = await authenticateOrganizerRequest(request)
-    
+
     if (!authResult.success) {
       return createOrganizerAuthErrorResponse(authResult)
     }
 
-    // Add organizer context to request if needed
     return handler(request, ...args)
   }
 }
@@ -197,14 +195,14 @@ export function withOrganizerOnlyAuth<T extends unknown[]>(
  * Check if current user is organizer
  */
 export function isCurrentUserOrganizer(user: UserWithRole | null): boolean {
-  return user?.user_metadata?.role === 'organizer'
+  return user?.role === 'organizer'
 }
 
 /**
  * Check if current user is admin
  */
 export function isCurrentUserAdmin(user: UserWithRole | null): boolean {
-  return user?.user_metadata?.role === 'admin'
+  return user?.role === 'admin'
 }
 
 /**
@@ -212,9 +210,8 @@ export function isCurrentUserAdmin(user: UserWithRole | null): boolean {
  */
 export function getUserRoleDisplayName(user: UserWithRole | null): string {
   if (!user) return 'Guest'
-  
-  const role = user.user_metadata?.role
-  switch (role) {
+
+  switch (user.role) {
     case 'admin':
       return 'Administrator'
     case 'organizer':

@@ -37,7 +37,7 @@ export function LogoutDialog({ open, onOpenChange, redirectTo }: LogoutDialogPro
       let redirect = redirectTo || '/auth/login';
       
       if (!redirectTo) {
-        const userRole = user?.user_metadata?.role;
+        const userRole = user?.role;
         if (userRole === 'organizer') {
           redirect = '/auth/login'; // Organizers can use the same login page
         } else if (userRole === 'admin') {

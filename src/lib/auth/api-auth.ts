@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { createSupabaseApiClient } from '@/lib/auth/supabase-server'
+import { auth } from '@/lib/auth/auth'
 import { UserRole, UserWithRole } from '@/lib/types/auth'
 import { hasRole, hasPermission, getRoleErrorMessage } from '@/lib/utils/role-utils'
 
@@ -27,7 +27,7 @@ export interface ApiAuthOptions {
  * Authenticate and authorize API requests
  */
 export async function authenticateApiRequest(
-  request: NextRequest,
+  _request: NextRequest,
   options: ApiAuthOptions = {}
 ): Promise<ApiAuthResult> {
   const {
@@ -38,22 +38,9 @@ export async function authenticateApiRequest(
   } = options
 
   try {
-    // Get Supabase client for API routes
-    const supabase = createSupabaseApiClient(request)
+    const session = await auth()
 
-    // Get authenticated user from request (secure method)
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-
-    if (authError) {
-      return {
-        success: false,
-        error: 'Authentication error: ' + authError.message,
-        statusCode: 401,
-      }
-    }
-
-    // Check if authentication is required
-    if (requireAuth && !authUser) {
+    if (requireAuth && !session?.user) {
       return {
         success: false,
         error: 'Authentication required',
@@ -61,18 +48,22 @@ export async function authenticateApiRequest(
       }
     }
 
-    // If no authentication required and no user, allow access
-    if (!requireAuth && !authUser) {
+    if (!requireAuth && !session?.user) {
       return { success: true }
     }
 
-    const user = authUser as UserWithRole
+    const user: UserWithRole = {
+      id: session!.user.id,
+      email: session!.user.email,
+      name: session!.user.name,
+      role: session!.user.role as UserRole,
+    }
 
     // Check specific required role
     if (requiredRole && !hasRole(user, requiredRole)) {
       return {
         success: false,
-        error: getRoleErrorMessage(requiredRole, user?.user_metadata?.role || null),
+        error: getRoleErrorMessage(requiredRole, user.role || null),
         statusCode: 403,
       }
     }
@@ -126,9 +117,9 @@ export function createApiAuthMiddleware(options: ApiAuthOptions = {}) {
  */
 export function createAuthErrorResponse(result: ApiAuthResult) {
   return Response.json(
-    { 
+    {
       error: result.error || 'Authentication failed',
-      success: false 
+      success: false
     },
     { status: result.statusCode || 401 }
   )
@@ -176,12 +167,11 @@ export function withApiAuth<T extends unknown[]>(
 ) {
   return async (request: NextRequest, ...args: T): Promise<Response> => {
     const authResult = await authenticateApiRequest(request, options)
-    
+
     if (!authResult.success) {
       return createAuthErrorResponse(authResult)
     }
 
-    // Add user to request context if needed
     return handler(request, ...args)
   }
 }

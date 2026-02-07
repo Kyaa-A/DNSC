@@ -8,8 +8,8 @@ interface BaseEmailTemplateProps {
 
 export function BaseEmailTemplate({ title: _title, children }: BaseEmailTemplateProps) {
   return (
-    <html>
-      <body style={{ margin: 0, padding: 0, backgroundColor: '#f8fafc' }}>
+    <div>
+      <div style={{ margin: 0, padding: 0, backgroundColor: '#f8fafc' }}>
         <table width="100%" cellPadding={0} cellSpacing={0} role="presentation" style={{ backgroundColor: '#f8fafc', padding: '32px 0' }}>
           <tbody>
             <tr>
@@ -68,8 +68,8 @@ export function BaseEmailTemplate({ title: _title, children }: BaseEmailTemplate
             </tr>
           </tbody>
         </table>
-      </body>
-    </html>
+      </div>
+    </div>
   )
 }
 

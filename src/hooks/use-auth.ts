@@ -18,8 +18,8 @@ export function useAuth(): AuthContextType {
  * Hook to check if user is authenticated
  */
 export function useIsAuthenticated(): boolean {
-  const { user, session } = useAuth()
-  return !!(user && session)
+  const { user, loading } = useAuth()
+  return !loading && !!user
 }
 
 /**
@@ -55,14 +55,6 @@ export function useUser() {
 }
 
 /**
- * Hook to get session information
- */
-export function useSession() {
-  const { session } = useAuth()
-  return session
-}
-
-/**
  * Hook to get auth loading state
  */
 export function useAuthLoading(): boolean {
@@ -82,11 +74,10 @@ export function useAuthError(): string | null {
  * Hook for authentication actions
  */
 export function useAuthActions() {
-  const { signIn, signUp, signOut, resetPassword, refreshSession } = useAuth()
-  
+  const { signIn, signOut, resetPassword, refreshSession } = useAuth()
+
   return {
     signIn,
-    signUp,
     signOut,
     resetPassword,
     refreshSession,

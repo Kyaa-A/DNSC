@@ -5,7 +5,7 @@ import type { UserRole, UserWithRole, RolePermissions } from '@/lib/types/auth'
  */
 export function hasRole(user: UserWithRole | null, role: UserRole): boolean {
   if (!user) return false
-  return user.user_metadata?.role === role
+  return user.role === role
 }
 
 /**
@@ -35,7 +35,7 @@ export function hasAnyRole(user: UserWithRole | null, roles: UserRole[]): boolea
  */
 export function getUserRole(user: UserWithRole | null): UserRole | null {
   if (!user) return null
-  return user.user_metadata?.role || null
+  return user.role || null
 }
 
 /**
@@ -57,7 +57,7 @@ export function getRoleDisplayName(role: UserRole | null): string {
  */
 export function getRolePermissions(user: UserWithRole | null): RolePermissions {
   const role = getUserRole(user)
-  
+
   switch (role) {
     case 'admin':
       return {
@@ -90,7 +90,7 @@ export function getRolePermissions(user: UserWithRole | null): RolePermissions {
  * Check if user has a specific permission
  */
 export function hasPermission(
-  user: UserWithRole | null, 
+  user: UserWithRole | null,
   permission: keyof RolePermissions
 ): boolean {
   const permissions = getRolePermissions(user)
@@ -135,34 +135,34 @@ export function hasMinimumRoleLevel(user: UserWithRole | null, requiredRole: Use
 }
 
 /**
- * Get role-specific navigation items (for future use)
+ * Get role-specific navigation items
  */
 export function getRoleNavigation(user: UserWithRole | null) {
   const role = getUserRole(user)
   const permissions = getRolePermissions(user)
-  
+
   const baseItems = [
     { href: '/admin/dashboard', label: 'Dashboard', permission: 'canAccessAdminPanel' },
     { href: '/admin/register', label: 'Register Students', permission: 'canRegisterStudents' },
     { href: '/admin/analytics', label: 'Analytics', permission: 'canViewAnalytics' },
   ]
-  
+
   const adminOnlyItems = [
     { href: '/admin/students', label: 'Manage Students', permission: 'canManageStudents' },
     { href: '/admin/settings', label: 'Settings', permission: 'canEditSettings' },
   ]
-  
-  let allowedItems = baseItems.filter(item => 
+
+  let allowedItems = baseItems.filter(item =>
     permissions[item.permission as keyof RolePermissions]
   )
-  
+
   if (role === 'admin') {
     const allowedAdminItems = adminOnlyItems.filter(item =>
       permissions[item.permission as keyof RolePermissions]
     )
     allowedItems = [...allowedItems, ...allowedAdminItems]
   }
-  
+
   return allowedItems
 }
 
@@ -173,10 +173,10 @@ export function getRoleErrorMessage(requiredRole: UserRole, userRole: UserRole |
   if (!userRole) {
     return 'You must be logged in to access this resource.'
   }
-  
+
   if (userRole === requiredRole) {
     return 'Access granted.'
   }
-  
+
   return `This resource requires ${getRoleDisplayName(requiredRole)} privileges. You currently have ${getRoleDisplayName(userRole)} access.`
 }

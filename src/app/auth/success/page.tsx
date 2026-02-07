@@ -14,7 +14,7 @@ export default function AuthSuccessPage() {
   useEffect(() => {
     if (!loading && user) {
       // Get user role and redirect accordingly
-      const userRole = user.user_metadata?.role;
+      const userRole = user.role;
       
       let redirectPath = '/admin/dashboard'; // Default fallback
       
@@ -60,7 +60,7 @@ export default function AuthSuccessPage() {
     return null; // Will redirect to login
   }
 
-  const userRole = user.user_metadata?.role;
+  const userRole = user.role;
   const roleDisplayName = userRole === 'admin' ? 'Administrator' : 
                          userRole === 'organizer' ? 'Organizer' : 'User';
 

@@ -106,7 +106,7 @@ export function OrganizerNav() {
                     {user?.email || 'Organizer'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {getRoleDisplayName(user?.user_metadata?.role || null)}
+                    {getRoleDisplayName(user?.role || null)}
                   </p>
                 </div>
               </div>
@@ -198,7 +198,7 @@ export function OrganizerNav() {
                       {user?.email || 'Organizer'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {getRoleDisplayName(user?.user_metadata?.role || null)}
+                      {getRoleDisplayName(user?.role || null)}
                     </p>
                   </div>
                 </div>

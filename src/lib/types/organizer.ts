@@ -20,12 +20,7 @@ export interface OrganizerPermissions {
  * Organizer user interface extending base user
  */
 export interface OrganizerUser extends UserWithRole {
-  user_metadata: {
-    role: OrganizerRole
-    full_name?: string
-    avatar_url?: string
-    assigned_events?: string[]
-  } & UserWithRole['user_metadata']
+  role: OrganizerRole
 }
 
 /**
@@ -148,7 +143,7 @@ export interface OrganizerSessionManagement {
 /**
  * Organizer authentication error types
  */
-export type OrganizerAuthErrorType = 
+export type OrganizerAuthErrorType =
   | 'invalid_credentials'
   | 'user_not_found'
   | 'insufficient_permissions'

@@ -12,7 +12,7 @@ export interface ActivityInput {
   action: string;
   description: string;
   studentId?: string;
-  userId?: string; // Supabase user ID
+  userId?: string; // Authenticated user ID
   programId?: string;
   metadata?: Record<string, unknown>;
   source?: ActivitySource;
@@ -29,7 +29,7 @@ export interface ActivityFilter {
   source?: ActivitySource | ActivitySource[];
   severity?: ActivitySeverity | ActivitySeverity[];
   studentId?: string;
-  userId?: string; // Supabase user ID
+  userId?: string; // Authenticated user ID
   programId?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -43,7 +43,7 @@ export interface ActivityWithRelations {
   action: string;
   description: string;
   studentId: string | null;
-  userId: string | null; // Supabase user ID
+  userId: string | null; // Authenticated user ID
   programId: string | null;
   metadata: unknown;
   source: string;

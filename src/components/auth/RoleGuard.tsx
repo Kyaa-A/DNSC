@@ -83,7 +83,7 @@ export function RoleGuard({
   if (requiredRole) {
     hasAccess = hasRole(user, requiredRole)
     if (!hasAccess) {
-      errorMessage = getRoleErrorMessage(requiredRole, user.user_metadata?.role || null)
+      errorMessage = getRoleErrorMessage(requiredRole, user.role || null)
     }
   }
 
@@ -143,7 +143,7 @@ export function RoleGuard({
           </Button>
           
           <div className="text-sm text-gray-500">
-            Current role: <span className="font-medium">{getRoleDisplayName(user.user_metadata?.role || null)}</span>
+            Current role: <span className="font-medium">{getRoleDisplayName(user.role || null)}</span>
           </div>
         </div>
       </div>

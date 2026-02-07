@@ -115,7 +115,7 @@ export function AdminNav() {
                     {user?.email || 'Admin User'}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {getRoleDisplayName(user?.user_metadata?.role || null)}
+                    {getRoleDisplayName(user?.role || null)}
                   </p>
                 </div>
               </div>
@@ -207,7 +207,7 @@ export function AdminNav() {
                       {user?.email || 'Admin User'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {getRoleDisplayName(user?.user_metadata?.role || null)}
+                      {getRoleDisplayName(user?.role || null)}
                     </p>
                   </div>
                 </div>

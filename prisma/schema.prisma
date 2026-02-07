@@ -9,8 +9,23 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model - stores auth credentials (replaces Supabase auth.users)
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          String    @default("organizer") // "admin" | "organizer"
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
 }
 
 // Program model - stores academic programs (BSIT, BSCPE, etc.)
@@ -137,7 +152,7 @@ model Activity {
   program     Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
   organizer   Organizer? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
   event       Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  // Note: userId references Supabase auth.users (not a Prisma relationship)
+  // Note: userId references the authenticated user who performed the action
   
   // Indexes for performance and querying
   @@index([type])
@@ -161,7 +176,7 @@ model Activity {
 // Organizer model - stores event organizers and their roles
 model Organizer {
   id          String   @id @default(cuid())
-  email       String   @unique // Must match Supabase auth.users email
+  email       String   @unique
   fullName    String
   role        String   @default("organizer") // "organizer" or "admin"
   isActive    Boolean  @default(true)
