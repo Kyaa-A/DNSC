@@ -34,7 +34,7 @@ export default function StudentsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400 text-black">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
               <Users className="h-4 w-4" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
@@ -49,13 +49,13 @@ export default function StudentsPage() {
         {/* Header Actions */}
         <div className="flex items-center gap-2">
           {/* Add Student Button */}
-          <Button className="hidden sm:flex items-center gap-2 bg-yellow-500 text-black hover:bg-yellow-600">
+          <Button className="hidden sm:flex items-center gap-2 bg-primary-600 text-white hover:bg-primary-700">
             <UserPlus className="h-4 w-4" />
             Add Student
           </Button>
 
           {/* Mobile Add Button */}
-          <Button size="icon" className="sm:hidden bg-yellow-500 text-black hover:bg-yellow-600">
+          <Button size="icon" className="sm:hidden bg-primary-600 text-white hover:bg-primary-700">
             <UserPlus className="h-4 w-4" />
           </Button>
 
@@ -103,13 +103,13 @@ export default function StudentsPage() {
             <Button 
               variant={showFilters ? "default" : "outline"} 
               size="sm" 
-              className={`flex items-center gap-2 ${showFilters ? 'ring-1 ring-yellow-500' : ''}`}
+              className={`flex items-center gap-2 ${showFilters ? 'ring-1 ring-primary-500' : ''}`}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="h-4 w-4" />
               <span className="hidden sm:inline">Filters</span>
               {Object.keys(filters).length > 0 && (
-                <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-xs text-black">
+                <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary-600 text-xs text-white">
                   {Object.keys(filters).length}
                 </span>
               )}
@@ -137,7 +137,7 @@ export default function StudentsPage() {
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-yellow-600" />
+            <Users className="h-4 w-4 text-primary-600" />
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Total Students
             </span>
@@ -170,7 +170,7 @@ export default function StudentsPage() {
         </div>
         <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
           <div className="flex items-center gap-2">
-            <Download className="h-4 w-4 text-yellow-600" />
+            <Download className="h-4 w-4 text-primary-600" />
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
               QR Generated
             </span>

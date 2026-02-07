@@ -285,7 +285,7 @@ export function ScanPage() {
         <div className="space-y-4 sm:space-y-6">
         {/* Floating Stats Counter */}
         <div className="fixed top-4 right-4 z-50 hidden sm:block">
-          <div className="bg-gradient-to-br from-yellow-500 to-amber-500 dark:from-yellow-600 dark:to-amber-600 backdrop-blur-xl border border-white/20 rounded-xl p-2 sm:p-3 shadow-lg shadow-yellow-500/30 dark:shadow-yellow-900/30">
+          <div className="bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 backdrop-blur-xl border border-white/20 rounded-xl p-2 sm:p-3 shadow-lg shadow-primary-500/30 dark:shadow-primary-900/30">
             <div className="text-center">
               <div className="text-lg sm:text-2xl font-bold text-white mb-0.5">
                 {attendanceStats.totalScanned}
@@ -300,7 +300,7 @@ export function ScanPage() {
 
         {/* Mobile counter - bottom right */}
         <div className="fixed bottom-4 right-4 z-50 sm:hidden">
-          <div className="bg-gradient-to-br from-yellow-500 to-amber-500 dark:from-yellow-600 dark:to-amber-600 backdrop-blur-xl border border-white/20 rounded-xl p-2 shadow-lg shadow-yellow-500/30 dark:shadow-yellow-900/30">
+          <div className="bg-gradient-to-br from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 backdrop-blur-xl border border-white/20 rounded-xl p-2 shadow-lg shadow-primary-500/30 dark:shadow-primary-900/30">
             <div className="text-center">
               <div className="text-lg font-bold text-white mb-0.5">
                 {attendanceStats.totalScanned}

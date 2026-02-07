@@ -226,7 +226,7 @@ export function OrganizerStats({
                 card.color === 'blue' && 'bg-blue-100 text-blue-600',
                 card.color === 'green' && 'bg-green-100 text-green-600',
                 card.color === 'red' && 'bg-red-100 text-red-600',
-                card.color === 'yellow' && 'bg-yellow-100 text-yellow-600',
+                card.color === 'yellow' && 'bg-primary-100 text-primary-600',
                 card.color === 'purple' && 'bg-purple-100 text-purple-600',
               )}>
                 <card.icon className="h-4 w-4" />

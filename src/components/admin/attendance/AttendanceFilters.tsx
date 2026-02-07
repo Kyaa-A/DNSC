@@ -264,12 +264,12 @@ export function AttendanceFilters({ sessions, selectedSessionIds, onSelectionCha
               disabled={!hasPendingChanges}
               className={cn(
                 "bg-primary hover:bg-primary/90",
-                hasPendingChanges && "ring-2 ring-yellow-500 ring-offset-2"
+                hasPendingChanges && "ring-2 ring-primary-500 ring-offset-2"
               )}
             >
               Apply Filters
               {hasPendingChanges && (
-                <span className="ml-2 h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                <span className="ml-2 h-2 w-2 rounded-full bg-primary-400 animate-pulse" />
               )}
             </Button>
             <div className="flex items-center gap-1">

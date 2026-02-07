@@ -18,7 +18,7 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-yellow-400 text-black shadow-inner">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white shadow-inner">
           <BarChart3 className="h-4 w-4" />
         </div>
         <h1 className="text-2xl font-bold">Analytics</h1>

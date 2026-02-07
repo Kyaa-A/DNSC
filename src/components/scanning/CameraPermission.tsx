@@ -141,7 +141,7 @@ export function CameraPermission({
     }
 
     if (permissionState?.prompt) {
-      return <Camera className="h-6 w-6 text-yellow-500" />;
+      return <Camera className="h-6 w-6 text-primary-500" />;
     }
 
     return <CameraOff className="h-6 w-6 text-gray-400" />;
@@ -328,7 +328,7 @@ export function CameraPermission({
               <ul className="text-sm mt-1 space-y-1">
                 {requirements.recommendations.map((recommendation, index) => (
                   <li key={index} className="flex items-start">
-                    <span className="text-yellow-500 mr-2">•</span>
+                    <span className="text-primary-500 mr-2">•</span>
                     {recommendation}
                   </li>
                 ))}
@@ -381,7 +381,7 @@ export function CameraPermissionStatus({
   const getStatusColor = () => {
     if (permissionState.granted) return 'text-green-500';
     if (permissionState.denied) return 'text-red-500';
-    if (permissionState.prompt) return 'text-yellow-500';
+    if (permissionState.prompt) return 'text-primary-500';
     return 'text-gray-400';
   };
 
