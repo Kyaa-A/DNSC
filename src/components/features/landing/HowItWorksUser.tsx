@@ -28,7 +28,7 @@ export function HowItWorksUser() {
                     <span className="size-2 rounded-full bg-green-400 shadow-sm" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="size-2 bg-blue-500 rounded-full animate-pulse" />
+                    <div className="size-2 bg-primary-500 rounded-full animate-pulse" />
                     <div className="text-xs text-gray-500 font-medium">Student View</div>
                   </div>
                 </div>
@@ -38,10 +38,10 @@ export function HowItWorksUser() {
                     {HOW_IT_WORKS_USER.map((s, idx) => (
                       <div
                         key={s.title}
-                        className={`rounded-xl border p-2 sm:p-3 transition-all duration-200 ${activeIdx === idx ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-white border-gray-200"}`}
+                        className={`rounded-xl border p-2 sm:p-3 transition-all duration-200 ${activeIdx === idx ? "bg-primary-50 border-primary-200 shadow-sm" : "bg-white border-gray-200"}`}
                       >
                         <div className="flex items-center gap-2">
-                          <CheckCircle2 className={`size-4 transition-colors ${activeIdx === idx ? "text-blue-600" : "text-green-500"}`} />
+                          <CheckCircle2 className={`size-4 transition-colors ${activeIdx === idx ? "text-primary-600" : "text-green-500"}`} />
                           <p className="text-xs sm:text-sm font-bold text-gray-900">{idx + 1}. {s.title}</p>
                         </div>
                         <p className="text-[11px] sm:text-xs text-gray-600 mt-1">{s.body}</p>
@@ -91,7 +91,7 @@ export function HowItWorksUser() {
           {/* Header + Timeline - Right side for user */}
           <Reveal direction="right" delayMs={200} className="lg:col-span-1 order-2">
             <div className="mb-4 sm:mb-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-sm font-medium mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 border border-primary-200 text-primary-800 text-sm font-medium mb-3">
                 <Users className="size-3" />
                 <span>For Students</span>
               </div>
@@ -102,14 +102,14 @@ export function HowItWorksUser() {
                 const Icon = icons[idx] ?? CheckCircle2
                 return (
                   <li key={s.title} className="relative select-none">
-                    <span className={`absolute -left-[11px] sm:-left-[13px] mt-2 sm:mt-3 inline-flex items-center justify-center size-5 sm:size-6 rounded-full text-[10px] sm:text-xs font-bold ring-8 ring-white shadow-sm transition-all duration-200 ${activeIdx === idx ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-600"}`}>{idx + 1}</span>
+                    <span className={`absolute -left-[11px] sm:-left-[13px] mt-2 sm:mt-3 inline-flex items-center justify-center size-5 sm:size-6 rounded-full text-[10px] sm:text-xs font-bold ring-8 ring-white shadow-sm transition-all duration-200 ${activeIdx === idx ? "bg-primary-500 text-white" : "bg-gray-300 text-gray-600"}`}>{idx + 1}</span>
                     <button
                       type="button"
                       onClick={() => setActiveIdx(idx)}
                       aria-pressed={activeIdx === idx}
-                      className={`w-full text-left flex items-center gap-3 rounded-xl p-2 sm:p-3 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${activeIdx === idx ? "bg-blue-50 border border-blue-200" : "bg-transparent"}`}
+                      className={`w-full text-left flex items-center gap-3 rounded-xl p-2 sm:p-3 transition-all duration-200 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 ${activeIdx === idx ? "bg-primary-50 border border-primary-200" : "bg-transparent"}`}
                     >
-                      <span className={`mt-0.5 inline-flex items-center justify-center size-7 sm:size-8 rounded-xl transition-all duration-200 ${activeIdx === idx ? "bg-blue-500 text-white shadow-sm" : "bg-blue-100 text-blue-600"}`}>
+                      <span className={`mt-0.5 inline-flex items-center justify-center size-7 sm:size-8 rounded-xl transition-all duration-200 ${activeIdx === idx ? "bg-primary-500 text-white shadow-sm" : "bg-primary-100 text-primary-600"}`}>
                         <Icon className="size-4" />
                       </span>
                       <h4 className="font-bold text-sm sm:text-base text-gray-900">{s.title}</h4>

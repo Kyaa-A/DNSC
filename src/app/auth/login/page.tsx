@@ -7,16 +7,16 @@ import { Toaster } from '@/components/ui/sonner';
 import { GraduationCap } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Login - DTP Attendance System',
-  description: 'Sign in to access the DTP Attendance system',
+  title: 'Login - DNSC Attendance System',
+  description: 'Sign in to access the DNSC Attendance system',
 };
 
 export default function LoginPage() {
   return (
-    <div className="relative fixed inset-0 w-screen h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-white to-amber-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="relative fixed inset-0 w-screen h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Background Elements - More subtle for better contrast */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400/5 dark:bg-yellow-400/3 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/5 dark:bg-amber-400/3 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary-400/5 dark:bg-primary-400/3 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary-400/5 dark:bg-secondary-400/3 rounded-full blur-3xl" />
       
       {/* Subtle overlay to enhance form contrast */}
       <div className="absolute inset-0 bg-white/20 dark:bg-gray-900/20 pointer-events-none" />
@@ -24,11 +24,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md px-4 space-y-6 relative z-10">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800">
-            <GraduationCap className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800">
+            <GraduationCap className="h-8 w-8 text-primary-600 dark:text-primary-400" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">DTP Attendance</h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">University of Mindanao Digos College</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">DNSC Attendance</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Davao del Norte State College</p>
         </div>
 
         {/* Login Card */}
@@ -48,10 +48,10 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© 2025 University of Mindanao Digos College - DTP</p>
+          <p>© 2025 Davao del Norte State College - DNSC</p>
         </div>
       </div>
       <Toaster richColors />
     </div>
   );
-} 
+}

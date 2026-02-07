@@ -26,7 +26,7 @@ export function FinalCta() {
             <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <p className="text-sm font-medium text-gray-600 mb-1">Experience the platform</p>
               <div className="text-2xl font-bold text-gray-900 mb-4">Start Free Today</div>
-              <Button className="mt-2 h-12 w-full px-6 text-base bg-yellow-400 text-black hover:bg-yellow-500 shadow-md hover:shadow-lg transition-all duration-200 group">
+              <Button className="mt-2 h-12 w-full px-6 text-base bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 group">
                 <span className="flex items-center justify-center">
                   {FINAL_CTA.ctaText}
                   <ArrowRight className="ml-2 size-4 group-hover:translate-x-1 transition-transform" />
@@ -42,11 +42,11 @@ export function FinalCta() {
                     <span>Secure</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="size-2 bg-blue-500 rounded-full" />
+                    <div className="size-2 bg-primary-500 rounded-full" />
                     <span>Verified</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="size-2 bg-yellow-500 rounded-full" />
+                    <div className="size-2 bg-primary-600 rounded-full" />
                     <span>Trusted</span>
                   </div>
                 </div>
@@ -58,5 +58,3 @@ export function FinalCta() {
     </section>
   )
 }
-
-

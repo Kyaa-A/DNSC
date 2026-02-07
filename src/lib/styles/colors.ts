@@ -1,5 +1,5 @@
 /**
- * Color System for DTP Attendance
+ * Color System for DNSC Attendance
  *
  * This file defines the color hierarchy using Tailwind CSS v4 @theme directive
  * and provides utility functions for consistent color usage across components.
@@ -7,94 +7,94 @@
 
 // Base color palette (HSL values for better color manipulation)
 export const baseColors = {
-  // Primary brand colors
+  // Primary brand colors - DNSC Green
   primary: {
-    50: 'hsl(210, 100%, 98%)',   // Very light blue
-    100: 'hsl(210, 100%, 96%)',  // Light blue
-    200: 'hsl(214, 95%, 93%)',   // Lighter blue
-    300: 'hsl(213, 97%, 87%)',   // Light blue
-    400: 'hsl(215, 100%, 80%)',  // Medium light blue
-    500: 'hsl(217, 91%, 60%)',   // Main blue
-    600: 'hsl(221, 83%, 53%)',   // Medium blue
-    700: 'hsl(224, 76%, 48%)',   // Dark blue
-    800: 'hsl(226, 71%, 40%)',   // Darker blue
-    900: 'hsl(224, 64%, 33%)',   // Very dark blue
-    950: 'hsl(229, 84%, 18%)',   // Darkest blue
+    50: 'hsl(140, 60%, 98%)',   // Very light green
+    100: 'hsl(140, 50%, 95%)',  // Light green
+    200: 'hsl(140, 50%, 90%)',  // Lighter green
+    300: 'hsl(140, 40%, 80%)',  // Light green
+    400: 'hsl(140, 45%, 65%)',  // Medium light green
+    500: 'hsl(142, 70%, 45%)',  // Main Green
+    600: 'hsl(142, 76%, 36%)',  // Deep Green (Brand)
+    700: 'hsl(145, 80%, 25%)',  // Dark Institutional Green
+    800: 'hsl(145, 85%, 20%)',  // Darker Green
+    900: 'hsl(145, 90%, 15%)',  // Very Dark Green
+    950: 'hsl(145, 90%, 10%)',  // Darkest Green
   },
   
-  // Secondary accent colors
+  // Secondary accent colors - Cool Grays/Greens
   secondary: {
-    50: 'hsl(220, 14%, 96%)',    // Very light gray-blue
-    100: 'hsl(220, 13%, 91%)',   // Light gray-blue
-    200: 'hsl(220, 13%, 81%)',   // Lighter gray-blue
-    300: 'hsl(216, 12%, 84%)',   // Light gray-blue
-    400: 'hsl(218, 11%, 65%)',   // Medium light gray-blue
-    500: 'hsl(220, 9%, 46%)',    // Main gray-blue
-    600: 'hsl(215, 14%, 34%)',   // Medium gray-blue
-    700: 'hsl(217, 19%, 27%)',   // Dark gray-blue
-    800: 'hsl(215, 28%, 17%)',   // Darker gray-blue
-    900: 'hsl(221, 39%, 11%)',   // Very dark gray-blue
-    950: 'hsl(229, 84%, 5%)',    // Darkest gray-blue
+    50: 'hsl(150, 20%, 98%)',
+    100: 'hsl(150, 20%, 94%)',
+    200: 'hsl(150, 15%, 88%)',
+    300: 'hsl(150, 12%, 80%)',
+    400: 'hsl(150, 10%, 65%)',
+    500: 'hsl(150, 10%, 45%)',
+    600: 'hsl(150, 12%, 35%)',
+    700: 'hsl(150, 20%, 25%)',
+    800: 'hsl(150, 25%, 15%)',
+    900: 'hsl(150, 30%, 10%)',
+    950: 'hsl(150, 30%, 5%)',
   },
   
-  // Success colors
+  // Success colors (Similar to primary but distinct enough if needed)
   success: {
-    50: 'hsl(138, 76%, 97%)',    // Very light green
-    100: 'hsl(141, 84%, 93%)',   // Light green
-    200: 'hsl(141, 79%, 85%)',   // Lighter green
-    300: 'hsl(142, 77%, 73%)',   // Light green
-    400: 'hsl(142, 69%, 58%)',   // Medium light green
-    500: 'hsl(142, 71%, 45%)',   // Main green
-    600: 'hsl(142, 76%, 36%)',   // Medium green
-    700: 'hsl(142, 72%, 29%)',   // Dark green
-    800: 'hsl(143, 64%, 24%)',   // Darker green
-    900: 'hsl(144, 61%, 20%)',   // Very dark green
-    950: 'hsl(145, 80%, 14%)',   // Darkest green
+    50: 'hsl(138, 76%, 97%)',
+    100: 'hsl(141, 84%, 93%)',
+    200: 'hsl(141, 79%, 85%)',
+    300: 'hsl(142, 77%, 73%)',
+    400: 'hsl(142, 69%, 58%)',
+    500: 'hsl(142, 71%, 45%)',
+    600: 'hsl(142, 76%, 36%)',
+    700: 'hsl(142, 72%, 29%)',
+    800: 'hsl(143, 64%, 24%)',
+    900: 'hsl(144, 61%, 20%)',
+    950: 'hsl(145, 80%, 14%)',
   },
   
   // Warning colors
   warning: {
-    50: 'hsl(48, 100%, 96%)',    // Very light yellow
-    100: 'hsl(48, 96%, 89%)',    // Light yellow
-    200: 'hsl(48, 96%, 77%)',    // Lighter yellow
-    300: 'hsl(47, 95%, 57%)',    // Light yellow
-    400: 'hsl(47, 95%, 44%)',    // Medium light yellow
-    500: 'hsl(47, 96%, 89%)',    // Main yellow
-    600: 'hsl(35, 100%, 50%)',   // Medium orange
-    700: 'hsl(32, 95%, 44%)',    // Dark orange
-    800: 'hsl(26, 90%, 37%)',    // Darker orange
-    900: 'hsl(23, 83%, 31%)',    // Very dark orange
-    950: 'hsl(15, 100%, 15%)',   // Darkest orange
+    50: 'hsl(48, 100%, 96%)',
+    100: 'hsl(48, 96%, 89%)',
+    200: 'hsl(48, 96%, 77%)',
+    300: 'hsl(47, 95%, 57%)',
+    400: 'hsl(47, 95%, 44%)',
+    500: 'hsl(47, 96%, 89%)',
+    600: 'hsl(35, 100%, 50%)',
+    700: 'hsl(32, 95%, 44%)',
+    800: 'hsl(26, 90%, 37%)',
+    900: 'hsl(23, 83%, 31%)',
+    950: 'hsl(15, 100%, 15%)',
   },
   
   // Error colors
   error: {
-    50: 'hsl(0, 85%, 97%)',      // Very light red
-    100: 'hsl(0, 93%, 94%)',     // Light red
-    200: 'hsl(0, 96%, 89%)',     // Lighter red
-    300: 'hsl(0, 94%, 82%)',     // Light red
-    400: 'hsl(0, 91%, 71%)',     // Medium light red
-    500: 'hsl(0, 84%, 60%)',     // Main red
-    600: 'hsl(0, 72%, 51%)',     // Medium red
-    700: 'hsl(0, 74%, 42%)',     // Dark red
-    800: 'hsl(0, 70%, 35%)',     // Darker red
-    900: 'hsl(0, 63%, 31%)',     // Very dark red
-    950: 'hsl(0, 85%, 15%)',     // Darkest red
+    50: 'hsl(0, 85%, 97%)',
+    100: 'hsl(0, 93%, 94%)',
+    200: 'hsl(0, 96%, 89%)',
+    300: 'hsl(0, 94%, 82%)',
+    400: 'hsl(0, 91%, 71%)',
+    500: 'hsl(0, 84%, 60%)',
+    600: 'hsl(0, 72%, 51%)',
+    700: 'hsl(0, 74%, 42%)',
+    800: 'hsl(0, 70%, 35%)',
+    900: 'hsl(0, 63%, 31%)',
+    950: 'hsl(0, 85%, 15%)',
   },
   
   // Neutral colors
   neutral: {
-    50: 'hsl(0, 0%, 98%)',       // Very light gray
-    100: 'hsl(0, 0%, 96%)',      // Light gray
-    200: 'hsl(0, 0%, 90%)',      // Lighter gray
-    300: 'hsl(0, 0%, 83%)',      // Light gray
-    400: 'hsl(0, 0%, 64%)',      // Medium light gray
-    500: 'hsl(0, 0%, 45%)',      // Main gray
-    600: 'hsl(0, 0%, 32%)',      // Medium gray
-    700: 'hsl(0, 0%, 25%)',      // Dark gray
-    800: 'hsl(0, 0%, 15%)',      // Darker gray
-    900: 'hsl(0, 0%, 9%)',       // Very dark gray
-    950: 'hsl(0, 0%, 4%)',       // Darkest gray
+    50: 'hsl(0, 0%, 98%)',
+    100: 'hsl(0, 0%, 96%)',
+    200: 'hsl(0, 0%, 90%)',
+    300: 'hsl(0, 0%, 83%)',
+    400: 'hsl(0, 0%, 64%)',
+    500: 'hsl(0, 0%, 45%)',
+    600: 'hsl(0, 0%, 32%)',
+    700: 'hsl(0, 0%, 25%)',
+    800: 'hsl(0, 0%, 15%)',
+    900: 'hsl(0, 0%, 9%)',
+    950: 'hsl(0, 0%, 4%)',
   },
 } as const;
 
@@ -417,8 +417,3 @@ export const colorThemeDirective = `
   --color-status-info-light: ${semanticColors.status.infoLight};
 }
 `;
-
-// Type exports for use in components
-export type BaseColors = typeof baseColors;
-export type SemanticColors = typeof semanticColors;
-export type ColorPath = string;

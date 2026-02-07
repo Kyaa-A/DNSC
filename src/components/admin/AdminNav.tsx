@@ -41,16 +41,16 @@ function NavLink({
       onClick={onClick}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
-        'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50',
-        'focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2',
+        'hover:bg-primary-50 hover:text-primary-900 dark:hover:bg-primary-900/20 dark:hover:text-primary-50',
+        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
         isActive 
-          ? 'bg-yellow-50 text-yellow-800 border-r-2 border-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-300' 
+          ? 'bg-primary-50 text-primary-800 border-r-2 border-primary-500 dark:bg-primary-900/20 dark:text-primary-300' 
           : 'text-gray-600 dark:text-gray-300'
       )}
     >
       <Icon className={cn(
         'h-5 w-5 transition-colors',
-        isActive ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-500 dark:text-gray-400'
+        isActive ? 'text-primary-700 dark:text-primary-300' : 'text-gray-500 dark:text-gray-400'
       )} />
       <span className="truncate">{label}</span>
     </Link>
@@ -84,9 +84,9 @@ export function AdminNav() {
           <div className="flex h-16 items-center border-b px-6 bg-gray-50/50 dark:bg-gray-800/50">
             <Link 
               href="/admin/dashboard" 
-              className="flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100 hover:text-yellow-700 dark:hover:text-yellow-300 transition-colors"
+              className="flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400 text-black">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
                 <LayoutDashboard className="h-4 w-4" />
               </div>
               <span className="text-lg">Admin Panel</span>
@@ -107,8 +107,8 @@ export function AdminNav() {
             {/* User Info */}
             <div className="p-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3 mb-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                  <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+                  <User className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -131,7 +131,7 @@ export function AdminNav() {
             </div>
             <div className="p-3 flex items-center justify-between">
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                DTP Attendance System
+                DNSC Attendance
               </div>
               <ThemeToggle />
             </div>
@@ -146,7 +146,7 @@ export function AdminNav() {
           href="/admin/dashboard" 
           className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400 text-black">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
             <LayoutDashboard className="h-4 w-4" />
           </div>
           <span className="text-lg">Admin</span>
@@ -176,7 +176,7 @@ export function AdminNav() {
                 onClick={handleNavClick}
                 className="flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400 text-black">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
                   <LayoutDashboard className="h-4 w-4" />
                 </div>
                 <span className="text-lg">Admin Panel</span>
@@ -199,8 +199,8 @@ export function AdminNav() {
               {/* Mobile User Info */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                    <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+                    <User className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
@@ -226,7 +226,7 @@ export function AdminNav() {
               </div>
               <div className="p-4 flex items-center justify-between">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  DTP Attendance System
+                  DNSC Attendance
                 </div>
                 <ThemeToggle />
               </div>
@@ -244,4 +244,4 @@ export function AdminNav() {
   );
 }
 
-export default AdminNav; 
+export default AdminNav;

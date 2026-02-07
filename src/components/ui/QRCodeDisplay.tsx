@@ -83,7 +83,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
     if (qrCodeUrl) {
       const link = document.createElement('a');
       link.href = qrCodeUrl;
-      link.download = `dtp-qr-code-${studentData?.studentIdNumber || studentId}.png`;
+      link.download = `dnsc-qr-code-${studentData?.studentIdNumber || studentId}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -95,8 +95,8 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
       <div className="relative py-8 px-4">
         <div className="">
           {/* Background Elements */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
 
           <div className="relative mx-auto max-w-2xl">
             {/* Header Section Skeleton */}
@@ -117,7 +117,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
 
             {/* QR Code Display Card Skeleton */}
             <div className="group relative overflow-hidden rounded-2xl border bg-white shadow-lg">
-              <div className="absolute -right-10 -top-10 size-24 rounded-full bg-yellow-400/10 blur-xl" />
+              <div className="absolute -right-10 -top-10 size-24 rounded-full bg-primary-400/10 blur-xl" />
 
               <div className="relative p-6 sm:p-8 space-y-6 bg-white">
                 {/* Student Information Skeleton */}
@@ -151,7 +151,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
                       
                       {/* Subtle scanning effect */}
                       <div 
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent w-8"
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-400/20 to-transparent w-8"
                         style={{ 
                           animation: 'scan-horizontal 3s ease-in-out infinite'
                         }} 
@@ -209,10 +209,10 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
 
   if (error) {
     return (
-      <div className="relative overflow-hidden bg-gradient-to-br from-yellow-50 via-white to-amber-50 min-h-screen py-8 px-4">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen py-8 px-4">
         {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
 
         <div className="relative mx-auto max-w-2xl flex items-center justify-center min-h-[60vh]">
           <div className="group relative overflow-hidden rounded-2xl border bg-white shadow-lg">
@@ -236,7 +236,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
               <div className="space-y-3">
                 <Button
                   onClick={handleRetry}
-                  className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full h-12 bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={retryCount >= 3}
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
@@ -262,20 +262,20 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
     <div className="relative  py-8 px-4">
       <div className="">
         {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
 
         <div className="relative mx-auto max-w-2xl">
           {/* Header Section */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-200 text-green-800 text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 border border-primary-200 text-primary-800 text-sm font-medium mb-4">
               <CheckCircle className="size-4" />
               <span>Registration Complete</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
               <span className="text-gray-900">Welcome to </span>
-              <span className="text-yellow-500">DTP Events!</span>
+              <span className="text-primary-600">DNSC Events!</span>
             </h1>
 
             <p className="text-lg text-gray-600 leading-relaxed max-w-lg mx-auto">
@@ -285,13 +285,13 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
 
           {/* QR Code Display Card */}
           <div className="group relative overflow-hidden rounded-2xl border bg-white shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="absolute -right-10 -top-10 size-24 rounded-full bg-yellow-400/10 blur-xl group-hover:bg-yellow-400/15 transition-colors" />
+            <div className="absolute -right-10 -top-10 size-24 rounded-full bg-primary-400/10 blur-xl group-hover:bg-primary-400/15 transition-colors" />
 
             <div className="relative p-6 sm:p-8 space-y-6 bg-white">
               {/* Student Information */}
               <div className="text-center space-y-2">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <User className="size-5 text-yellow-600" />
+                  <User className="size-5 text-primary-600" />
                   <span className="font-semibold text-gray-900">Student Information</span>
                 </div>
 
@@ -310,7 +310,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
                     <div className="bg-white rounded-lg p-4 shadow-sm inline-block">
                       <Image
                         src={qrCodeUrl}
-                        alt="Your DTP Event QR Code"
+                        alt="Your DNSC Event QR Code"
                         width={320}
                         height={380}
                         className="w-full max-w-[280px] sm:max-w-[320px] h-auto rounded-lg"
@@ -321,12 +321,12 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
                 )}
 
                 {/* Instructions */}
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <Camera className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <Camera className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
                     <div className="text-left">
-                      <p className="text-amber-800 text-sm font-semibold mb-1">Save this QR code:</p>
-                      <p className="text-amber-700 text-sm leading-relaxed">
+                      <p className="text-primary-800 text-sm font-semibold mb-1">Save this QR code:</p>
+                      <p className="text-primary-700 text-sm leading-relaxed">
                         Screenshot or download this image to use for event check-ins.
                       </p>
                     </div>
@@ -337,7 +337,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
                 <Button
                   onClick={handleDownload}
                   disabled={!qrCodeUrl}
-                  className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-black font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group/btn"
+                  className="w-full h-12 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group/btn"
                 >
                   <Download className="mr-2 h-4 w-4 group-hover/btn:scale-110 transition-transform" />
                   Download QR Code
@@ -351,7 +351,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
                       <span>Ready for Events</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Zap className="size-3 text-yellow-500" />
+                      <Zap className="size-3 text-primary-500" />
                       <span>Instant Check-in</span>
                     </div>
                   </div>
@@ -360,7 +360,7 @@ export function QRCodeDisplay({ studentId }: QRCodeDisplayProps) {
             </div>
 
             {/* Bottom Accent Line */}
-            <div className="h-1 w-0 bg-gradient-to-r from-yellow-400 to-yellow-500 transition-all duration-500 group-hover:w-full" />
+            <div className="h-1 w-0 bg-gradient-to-r from-primary-400 to-primary-500 transition-all duration-500 group-hover:w-full" />
           </div>
         </div>
       </div>

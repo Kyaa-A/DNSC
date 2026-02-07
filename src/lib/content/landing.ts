@@ -1,7 +1,7 @@
 export const ORG = {
-  name: "Department of Technical Program",
-  college: "University of Mindanao Digos College",
-  logoSrc: "/img/dtp.webp",
+  name: "Davao del Norte State College",
+  college: "Davao del Norte State College",
+  logoSrc: "/logo/dnsc.webp",
 };
 
 export const NAV_LINKS = [
@@ -12,11 +12,11 @@ export const NAV_LINKS = [
 ] as const;
 
 export const HERO = {
-  headline: "DTP Attendance System",
-  subheadline: "University of Mindanao Digos College",
+  headline: "DNSC Attendance System",
+  subheadline: "Davao del Norte State College",
   ctaText: "Get Started",
   ctaHref: "/join",
-  imageSrc: "/img/Hero.webp",
+  imageSrc: "/img/hero.webp",
 };
 
 export interface FeatureItem {
@@ -119,23 +119,23 @@ export const FINAL_CTA = {
 };
 
 export const FOOTER = {
-  contactEmail: "dtp.dc@umindanao.edu.ph",
-  contactPhone: "Department Phone Number",
+  contactEmail: "president@dnsc.edu.ph",
+  contactPhone: "+63 084-645-3064",
   legal: ["Privacy Policy", "Terms of Service"],
   address: [
-    "Department of Technical Program",
-    "University of Mindanao Digos College",
-    "Digos City, Philippines",
+    "Davao del Norte State College",
+    "New Visayas, Panabo City",
+    "Davao del Norte, Philippines",
   ],
   socials: [
     {
       label: "Website",
-      href: "https://umdc.umindanao.edu.ph/login",
+      href: "https://dnsc.edu.ph",
       type: "website",
     },
     {
       label: "Facebook",
-      href: "https://www.facebook.com/DepartmentOfTechnicalPrograms",
+      href: "https://www.facebook.com/davnorstatecollege",
       type: "facebook",
     },
   ],

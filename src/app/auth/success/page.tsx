@@ -40,7 +40,7 @@ export default function AuthSuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50/40 via-white to-amber-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50/40 via-white to-primary-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex items-center justify-center p-6">
       <Card className="w-full sm:w-[560px] md:w-[640px] bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-lg">
           <CardContent className="pt-6">
             <div className="flex items-center justify-center gap-3">
@@ -62,7 +62,7 @@ export default function AuthSuccessPage() {
                          userRole === 'organizer' ? 'Organizer' : 'User';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50/40 via-white to-amber-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50/40 via-white to-primary-50/40 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 flex items-center justify-center p-6">
       <Card className="w-full sm:w-[560px] md:w-[640px] bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-xl">
         <CardHeader className="text-center pt-8">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
