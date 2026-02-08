@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
-import { subDays } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -69,61 +68,8 @@ async function main() {
   }
   console.log('Programs seeded successfully.');
 
-  // Seed Students for development with varied registration dates
-  console.log('Seeding development students...');
-  const bsitProgram = await prisma.program.findUnique({
-    where: { name: 'BSIT' },
-  });
-  const bscpeProgram = await prisma.program.findUnique({
-    where: { name: 'BSCPE' },
-  });
-
-  if (bsitProgram && bscpeProgram) {
-    const studentsToSeed = [];
-    const today = new Date();
-
-    console.log('Generating 25 new sample students with recent registration dates...');
-    for (let i = 0; i < 25; i++) {
-      const studentId = `SEED-${String(i).padStart(4, '0')}`;
-      const createdAt = subDays(today, Math.floor(Math.random() * 80) + 1);
-      const program = i % 2 === 0 ? bsitProgram : bscpeProgram;
-
-      studentsToSeed.push({
-        studentIdNumber: studentId,
-        firstName: `Sample`,
-        lastName: `Student ${i}`,
-        email: `seed.student.${i}@example.com`,
-        year: Math.ceil(Math.random() * 4),
-        programId: program.id,
-        createdAt: createdAt,
-        registrationSource: 'admin',
-      });
-    }
-
-    let createdCount = 0;
-    for (const studentData of studentsToSeed) {
-      const existingStudent = await prisma.student.findUnique({
-        where: { studentIdNumber: studentData.studentIdNumber },
-      });
-
-      if (!existingStudent) {
-        await prisma.student.create({
-          data: studentData,
-        });
-        createdCount++;
-      }
-    }
-
-    if (createdCount > 0) {
-      console.log(`Added ${createdCount} new sample students to the database.`);
-    } else {
-      console.log('Sample students already exist. No new students were added.');
-    }
-  } else {
-    console.warn(
-      'Could not find BSIT or BSCPE programs. Skipping student seeding.',
-    );
-  }
+  // Note: Student seeding removed - students should be registered through the app
+  // If you need test students for development, uncomment the section below
 
   console.log('Database seeding finished.');
 }
