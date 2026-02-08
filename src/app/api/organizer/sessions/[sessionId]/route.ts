@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id: sessionId } = await params;
+    const { sessionId } = await params;
 
     // Fetch the session with event details
     const eventSession = await prisma.session.findUnique({
@@ -68,7 +68,7 @@ export async function GET(
       session: {
         id: eventSession.id,
         name: eventSession.name,
-        date: eventSession.timeInStart.toISOString(), // Use timeInStart as session date
+        date: eventSession.timeInStart.toISOString(),
         status,
         timeInStart: eventSession.timeInStart.toISOString(),
         timeInEnd: eventSession.timeInEnd.toISOString(),

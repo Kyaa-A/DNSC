@@ -37,7 +37,7 @@ interface SessionDetails {
 export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const sessionId = params.id as string;
+  const sessionId = params.sessionId as string;
   
   const [session, setSession] = useState<SessionDetails | null>(null);
   const [loading, setLoading] = useState(true);
