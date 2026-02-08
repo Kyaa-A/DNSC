@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StudentsTable from '@/components/admin/StudentsTable';
 import StudentsFilter, { FilterParams } from '@/components/admin/StudentsFilter';
 import { Button } from '@/components/ui/button';
@@ -23,10 +23,44 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
 
+interface StudentStats {
+  totalStudents: number;
+  thisMonth: number;
+  programs: number;
+  qrGenerated: number;
+}
+
 export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterParams>({});
+  const [stats, setStats] = useState<StudentStats>({
+    totalStudents: 0,
+    thisMonth: 0,
+    programs: 0,
+    qrGenerated: 0,
+  });
+
+  // Fetch stats on mount
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/admin/students/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setStats({
+            totalStudents: data.totalStudents || 0,
+            thisMonth: data.thisMonth || 0,
+            programs: data.programs || 0,
+            qrGenerated: data.qrGenerated || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch student stats:', error);
+      }
+    }
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
@@ -143,7 +177,7 @@ export default function StudentsPage() {
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            161
+            {stats.totalStudents}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
@@ -154,7 +188,7 @@ export default function StudentsPage() {
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            25
+            {stats.thisMonth}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
@@ -165,7 +199,7 @@ export default function StudentsPage() {
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            2
+            {stats.programs}
           </p>
         </div>
         <div className="rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
@@ -176,7 +210,7 @@ export default function StudentsPage() {
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            142
+            {stats.qrGenerated}
           </p>
         </div>
       </div>
@@ -184,4 +218,4 @@ export default function StudentsPage() {
       <Toaster richColors />
     </div>
   );
-} 
+}
