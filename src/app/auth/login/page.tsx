@@ -48,7 +48,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>© 2025 Davao del Norte State College - DNSC</p>
+          <p>© 2026 Davao del Norte State College - DNSC</p>
         </div>
       </div>
       <Toaster richColors />

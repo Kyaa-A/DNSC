@@ -52,7 +52,7 @@ export default function OrganizerResetPasswordPage() {
 
         {/* Footer */}
         <div className="text-center text-xs text-gray-500">
-          <p>© 2025 Davao del Norte State College - DNSC. All rights reserved.</p>
+          <p>© 2026 Davao del Norte State College - DNSC. All rights reserved.</p>
         </div>
       </div>
     </div>

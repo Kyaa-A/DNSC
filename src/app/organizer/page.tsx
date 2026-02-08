@@ -31,21 +31,21 @@ export default function OrganizerDashboard() {
       action: 'Student Check-in',
       student: 'John Doe',
       time: '2 minutes ago',
-      event: 'DTP Workshop 2025'
+      event: 'DTP Workshop 2026'
     },
     {
       id: 2,
       action: 'Student Check-out',
       student: 'Jane Smith',
       time: '5 minutes ago',
-      event: 'DTP Workshop 2025'
+      event: 'DTP Workshop 2026'
     },
     {
       id: 3,
       action: 'Session Started',
       student: 'System',
       time: '1 hour ago',
-      event: 'DTP Workshop 2025'
+      event: 'DTP Workshop 2026'
     }
   ];
 
@@ -215,7 +215,7 @@ export default function OrganizerDashboard() {
                   <QrCode className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">DTP Workshop 2025</h3>
+                  <h3 className="font-semibold">DTP Workshop 2026</h3>
                   <p className="text-sm text-muted-foreground">Session 1</p>
                 </div>
                 <Button asChild className="w-full">
