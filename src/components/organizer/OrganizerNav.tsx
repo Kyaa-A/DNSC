@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Calendar, QrCode, Menu, LogOut, User, Laptop } from 'lucide-react';
@@ -73,14 +74,12 @@ export function OrganizerNav() {
         <div className="flex h-full flex-col">
           {/* Desktop Header */}
           <div className="flex h-16 items-center border-b px-6 bg-muted/50">
-            <Link 
-              href="/organizer/sessions" 
-              className="flex items-center gap-3 font-semibold text-foreground hover:text-primary-700 dark:hover:text-yellow-300 transition-colors"
+            <Link
+              href="/organizer/sessions"
+              className="flex items-center gap-3 font-semibold text-foreground hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
-                <QrCode className="h-4 w-4" />
-              </div>
-              <span className="text-lg">Organizer Portal</span>
+              <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+              <span className="text-lg">DNSC Attendance</span>
             </Link>
           </div>
           
@@ -133,14 +132,12 @@ export function OrganizerNav() {
       {/* Mobile Header */}
       <header className="flex h-16 items-center justify-between border-b bg-background/95 backdrop-blur px-4 supports-[backdrop-filter]:bg-background/60 lg:hidden">
         {/* Mobile Logo */}
-        <Link 
-          href="/organizer/sessions" 
+        <Link
+          href="/organizer/sessions"
           className="flex items-center gap-2 font-semibold text-foreground"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
-            <QrCode className="h-4 w-4" />
-          </div>
-          <span className="text-lg">Organizer</span>
+          <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+          <span className="text-lg">DNSC Attendance</span>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -162,15 +159,13 @@ export function OrganizerNav() {
             
             {/* Mobile Sheet Header */}
             <div className="flex h-16 items-center justify-between border-b px-6 bg-muted/50">
-              <Link 
-                href="/organizer/sessions" 
+              <Link
+                href="/organizer/sessions"
                 onClick={handleNavClick}
                 className="flex items-center gap-3 font-semibold text-foreground"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white">
-                  <QrCode className="h-4 w-4" />
-                </div>
-                <span className="text-lg">Organizer Portal</span>
+                <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+                <span className="text-lg">DNSC Attendance</span>
               </Link>
             </div>
 

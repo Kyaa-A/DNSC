@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, LogOut, User, Calendar, UserCheck, Laptop } from 'lucide-react';
@@ -82,14 +83,12 @@ export function AdminNav() {
         <div className="flex h-full flex-col">
           {/* Desktop Header */}
           <div className="flex h-16 items-center border-b px-6 bg-gray-50/50 dark:bg-gray-800/50">
-            <Link 
-              href="/admin/dashboard" 
+            <Link
+              href="/admin/dashboard"
               className="flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
-                <LayoutDashboard className="h-4 w-4" />
-              </div>
-              <span className="text-lg">Admin Panel</span>
+              <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+              <span className="text-lg">DNSC Attendance</span>
             </Link>
           </div>
           
@@ -142,14 +141,12 @@ export function AdminNav() {
       {/* Mobile Header */}
       <header className="flex h-16 items-center justify-between border-b bg-white/95 backdrop-blur px-4 supports-[backdrop-filter]:bg-white/60 lg:hidden dark:bg-gray-900/95 dark:supports-[backdrop-filter]:bg-gray-900/60">
         {/* Mobile Logo */}
-        <Link 
-          href="/admin/dashboard" 
+        <Link
+          href="/admin/dashboard"
           className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
-            <LayoutDashboard className="h-4 w-4" />
-          </div>
-          <span className="text-lg">Admin</span>
+          <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+          <span className="text-lg">DNSC Attendance</span>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -171,15 +168,13 @@ export function AdminNav() {
             
             {/* Mobile Sheet Header */}
             <div className="flex h-16 items-center justify-between border-b px-6 bg-gray-50/50 dark:bg-gray-800/50">
-              <Link 
-                href="/admin/dashboard" 
+              <Link
+                href="/admin/dashboard"
                 onClick={handleNavClick}
                 className="flex items-center gap-3 font-semibold text-gray-900 dark:text-gray-100"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm">
-                  <LayoutDashboard className="h-4 w-4" />
-                </div>
-                <span className="text-lg">Admin Panel</span>
+                <Image src="/logo/dnsc.webp" alt="DNSC Logo" width={32} height={32} className="rounded-full" />
+                <span className="text-lg">DNSC Attendance</span>
               </Link>
             </div>
 
