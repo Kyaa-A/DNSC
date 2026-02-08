@@ -42,6 +42,7 @@ export function InviteOrganizerForm({
   initialData 
 }: InviteOrganizerFormProps) {
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventsLoaded, setEventsLoaded] = useState(false);
   const [invitationSuccess, setInvitationSuccess] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const { user, loading: authLoading } = useAuth();
@@ -58,6 +59,8 @@ export function InviteOrganizerForm({
       } catch (error) {
         console.error('Failed to load events:', error);
         toast.error('Failed to load events');
+      } finally {
+        setEventsLoaded(true);
       }
     }
     fetchEvents();
@@ -168,7 +171,7 @@ export function InviteOrganizerForm({
   }
 
   // Show loading state while events are being fetched
-  if (authLoading || (user && events.length === 0)) {
+  if (authLoading || (user && !eventsLoaded)) {
     return (
       <div className="py-2 sm:py-4">
         <div className="relative">
