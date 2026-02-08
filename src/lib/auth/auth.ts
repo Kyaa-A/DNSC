@@ -54,6 +54,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = user.role
         token.id = user.id
+
+        // Update lastLoginAt on the Organizer record if one exists
+        if (user.email) {
+          prisma.organizer.updateMany({
+            where: { email: user.email.toLowerCase() },
+            data: { lastLoginAt: new Date() },
+          }).catch(() => {}) // fire-and-forget, don't block login
+        }
       }
       return token
     },
