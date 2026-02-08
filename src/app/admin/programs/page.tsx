@@ -42,7 +42,6 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
 } from 'lucide-react';
 
 interface Program {

@@ -293,7 +293,7 @@ export const PublicRegisterForm = ({ onSubmit, isSubmitting }: PublicRegisterFor
               {/* Email Suggestions Dropdown */}
               {showEmailSuggestions && emailSuggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-32 overflow-y-auto">
-                  {emailSuggestions.slice(0, 2).map((suggestion, index) => (
+                  {emailSuggestions.slice(0, 2).map((suggestion) => (
                     <button
                       key={suggestion}
                       type="button"

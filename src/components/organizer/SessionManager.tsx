@@ -21,7 +21,7 @@ import {
   User,
   Activity
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
 import { toast } from 'sonner';
 
 interface Session {
@@ -98,7 +98,6 @@ export function SessionManager({ sessionId, className }: SessionManagerProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const _router = useRouter();
 
   const pageSize = 20;
 

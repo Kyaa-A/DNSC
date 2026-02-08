@@ -15,23 +15,27 @@ export async function GET(
 
     const { sessionId } = await params;
 
-    // Fetch the session with event details
-    const eventSession = await prisma.session.findUnique({
-      where: { id: sessionId },
-      include: {
-        event: {
-          select: {
-            id: true,
-            name: true,
+    // Fetch the session with event details and attendance counts by scan type
+    const [eventSession, timeInCount, timeOutCount, totalStudents] = await Promise.all([
+      prisma.session.findUnique({
+        where: { id: sessionId },
+        include: {
+          event: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-        _count: {
-          select: {
-            attendance: true,
-          },
-        },
-      },
-    });
+      }),
+      prisma.attendance.count({
+        where: { sessionId, scanType: 'time_in' },
+      }),
+      prisma.attendance.count({
+        where: { sessionId, scanType: 'time_out' },
+      }),
+      prisma.student.count(),
+    ]);
 
     if (!eventSession) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
@@ -75,8 +79,10 @@ export async function GET(
         timeOutStart: eventSession.timeOutStart?.toISOString() || null,
         timeOutEnd: eventSession.timeOutEnd?.toISOString() || null,
         event: eventSession.event,
-        attendanceCount: eventSession._count.attendance,
-        expectedAttendance: 0,
+        timeInCount,
+        timeOutCount,
+        attendanceCount: timeInCount,
+        expectedAttendance: totalStudents,
       },
     });
   } catch (error) {

@@ -206,7 +206,7 @@ export default function StudentsPage() {
           <div className="flex items-center gap-2">
             <Download className="h-4 w-4 text-primary-600" />
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              QR Generated
+              Scanned
             </span>
           </div>
           <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">

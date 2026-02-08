@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStudentById } from '@/lib/db/queries/students';
 import { withRateLimit } from '@/lib/auth/rate-limit';
 
-interface RouteContext {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
 export const GET = withRateLimit('api', async (req: NextRequest) => {
   try {
     // Extract student ID from URL

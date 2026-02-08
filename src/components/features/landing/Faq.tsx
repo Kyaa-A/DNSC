@@ -4,7 +4,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { FAQ } from "@/lib/content/landing"
 import { HelpCircle, MessageCircle } from "lucide-react"
 import { Reveal } from "@/components/ui/Reveal"
-import { cn } from "@/lib/utils"
 
 export function Faq() {
   return (

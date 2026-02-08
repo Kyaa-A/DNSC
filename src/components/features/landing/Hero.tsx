@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+
 import { Reveal } from "@/components/ui/Reveal";
 import { HERO } from "@/lib/content/landing";
 import {

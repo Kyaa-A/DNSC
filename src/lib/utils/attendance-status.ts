@@ -21,7 +21,6 @@ function toDate(d?: string | Date | null): Date | null {
 export function deriveAttendanceStatus(inputs: StatusInputs): AttendanceDerivedStatus {
   const timeIn = toDate(inputs.timeIn)
   const timeOut = toDate(inputs.timeOut)
-  const winStart = toDate(inputs.timeInWindowStart)
   const winEnd = toDate(inputs.timeInWindowEnd)
 
   if (timeIn && timeOut) {

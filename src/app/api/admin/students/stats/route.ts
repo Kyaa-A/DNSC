@@ -15,10 +15,10 @@ export async function GET(request: NextRequest) {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Fetch all stats in parallel
-    const [totalStudents, thisMonth, programs, qrGenerated] = await Promise.all([
+    const [totalStudents, thisMonth, programs, studentsWithAttendance] = await Promise.all([
       // Total students
       prisma.student.count(),
-      
+
       // Students registered this month
       prisma.student.count({
         where: {
@@ -27,19 +27,21 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      
+
       // Total active programs
       prisma.program.count(),
-      
-      // Students with QR codes generated (all students have QR codes in this system)
-      prisma.student.count(),
+
+      // Students who have at least one attendance record (have been scanned)
+      prisma.attendance.groupBy({
+        by: ['studentId'],
+      }).then(groups => groups.length),
     ]);
 
     return NextResponse.json({
       totalStudents,
       thisMonth,
       programs,
-      qrGenerated,
+      qrGenerated: studentsWithAttendance,
     });
   } catch (error) {
     console.error('Error fetching student stats:', error);

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { EmailLogo } from './email-logo'
 
 interface BaseEmailTemplateProps {
   title: string

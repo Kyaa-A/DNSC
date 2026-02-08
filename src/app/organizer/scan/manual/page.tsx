@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ManualEntryPage } from '@/components/scanning/ManualEntryPage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Shield, QrCode } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Manual Entry | DNSC Attendance Organizer',

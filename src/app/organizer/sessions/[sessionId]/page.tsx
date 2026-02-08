@@ -30,6 +30,8 @@ interface SessionDetails {
     id: string;
     name: string;
   };
+  timeInCount: number;
+  timeOutCount: number;
   attendanceCount: number;
   expectedAttendance: number;
 }
@@ -257,7 +259,7 @@ export default function SessionDetailPage() {
               <Clock className="h-8 w-8 text-orange-600" />
               <div>
                 <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
-                  0
+                  {session.timeOutCount}
                 </p>
                 <p className="text-sm text-orange-600 dark:text-orange-500">Checked Out</p>
               </div>

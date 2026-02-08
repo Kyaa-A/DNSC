@@ -68,7 +68,7 @@ export function ThemeProvider({
       setTheme(theme)
       try {
         localStorage.setItem('theme', theme)
-      } catch (e) {
+      } catch {
         // Ignore localStorage errors
       }
     },

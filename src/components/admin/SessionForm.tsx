@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { Save, X, Loader2, AlertTriangle, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useDebounce } from '@/hooks/use-debounce';
-import { createSessionSchema } from '@/lib/validations/session';
 
 interface SessionFormProps {
   eventId: string;

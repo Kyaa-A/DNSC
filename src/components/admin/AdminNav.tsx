@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, LogOut, User, Calendar, UserCheck, Laptop, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, LogOut, User, Calendar, UserCheck, GraduationCap } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
