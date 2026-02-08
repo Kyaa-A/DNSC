@@ -1,35 +1,52 @@
-import { createSmtpConfig, createTransporter, getEmailDefaults } from './nodemailer-config'
+import { Resend } from 'resend'
+
+const getResend = () => {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('Missing RESEND_API_KEY environment variable')
+  }
+  return new Resend(apiKey)
+}
+
+const getFromEmail = () => {
+  return process.env.EMAIL_FROM || 'DNSC Attendance <onboarding@resend.dev>'
+}
 
 export interface SendEmailOptions {
   to: string | string[]
   subject: string
   text?: string
   html?: string
-  attachments?: Array<{
-    filename?: string
-    content?: string | Buffer
-    path?: string
-    cid?: string
-    contentType?: string
-  }>
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<{ messageId: string }> {
-  const config = createSmtpConfig()
-  const transporter = createTransporter(config)
-  const defaults = getEmailDefaults()
+  const resend = getResend()
+  const from = getFromEmail()
+  const to = Array.isArray(options.to) ? options.to : [options.to]
 
-  const info = await transporter.sendMail({
-    from: defaults.from,
-    to: Array.isArray(options.to) ? options.to.join(',') : options.to,
+  // Use type assertion since Resend's types are overly strict
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const emailOptions: any = {
+    from,
+    to,
     subject: options.subject,
-    text: options.text,
-    html: options.html,
-    attachments: options.attachments,
-    replyTo: defaults.replyTo,
-  })
+  }
 
-  return { messageId: info.messageId }
+  if (options.text) {
+    emailOptions.text = options.text
+  }
+  if (options.html) {
+    emailOptions.html = options.html
+  }
+
+  const { data, error } = await resend.emails.send(emailOptions)
+
+  if (error) {
+    console.error('Resend email error:', error)
+    throw new Error(`Failed to send email: ${error.message}`)
+  }
+
+  return { messageId: data?.id || 'unknown' }
 }
 
 export async function sendTestEmail(recipient: string) {
@@ -40,5 +57,3 @@ export async function sendTestEmail(recipient: string) {
     html: '<p>This is a <strong>test email</strong> from DNSC Attendance system.</p>',
   })
 }
-
-
