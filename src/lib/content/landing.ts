@@ -135,7 +135,7 @@ export const FOOTER = {
     },
     {
       label: "Facebook",
-      href: "https://www.facebook.com/davnorstatecollege",
+      href: "https://www.facebook.com/profile.php?id=61555837292061",
       type: "facebook",
     },
   ],
