@@ -23,7 +23,7 @@ export function LoginForm({ redirectTo, showPasswordReset = true }: LoginFormPro
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn, loading: authLoading } = useAuth();
+  const { signIn } = useAuth();
   const router = useRouter();
 
   const form = useForm<LoginInput>({
@@ -35,7 +35,7 @@ export function LoginForm({ redirectTo, showPasswordReset = true }: LoginFormPro
   });
 
   async function onSubmit(values: LoginInput) {
-    if (submitting || authLoading) return;
+    if (submitting) return;
 
     try {
       setSubmitting(true);
@@ -89,7 +89,8 @@ export function LoginForm({ redirectTo, showPasswordReset = true }: LoginFormPro
     }
   }
 
-  const isLoading = submitting || authLoading;
+  // Only use submitting state for loading - don't wait for auth session check on login page
+  const isLoading = submitting;
 
   return (
     <Form {...form}>
