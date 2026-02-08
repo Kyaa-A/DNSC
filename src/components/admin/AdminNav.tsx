@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, LogOut, User, Calendar, UserCheck, Laptop } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, LogOut, User, Calendar, UserCheck, Laptop, GraduationCap } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
@@ -19,6 +19,7 @@ const allNavItems = [
   { href: '/admin/organizers', label: 'Organizers', icon: UserCheck, permission: 'canAccessAdminPanel' },
   { href: '/admin/register', label: 'Register Students', icon: UserPlus, permission: 'canRegisterStudents' },
   { href: '/admin/students', label: 'Manage Students', icon: Users, permission: 'canManageStudents' },
+  { href: '/admin/programs', label: 'Programs', icon: GraduationCap, permission: 'canAccessAdminPanel' },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, permission: 'canViewAnalytics' },
 ];
 
